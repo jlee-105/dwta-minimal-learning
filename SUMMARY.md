@@ -1,7 +1,8 @@
 # DWTA: method, results, and the state of the manuscript
 
 Snapshot date: 2026-09-14. Paper source lives in `paper/manuscript/`, code in
-`code_DWTA/`.
+`code_DWTA/`. Target venue: **Computers & Operations Research** (Elsevier,
+`elsarticle`). Repository: `github.com/jlee-105/dwta-minimal-learning`.
 
 ---
 
@@ -19,6 +20,14 @@ value at the end of the engagement (lower is better).
 
 The central claim: **of the two decisions a weapon makes each stage, only one
 needs to be learned.**
+
+The contribution is the *criterion* that says which one, not the network: cut a
+learned pipeline where a classical subroutine carries a per-stage guarantee,
+and learn the part where no per-stage rule can carry one even in principle.
+The criterion can be checked before any training run. Architecturally the
+method is standard (GNN, REINFORCE); what differs from every learned baseline
+is what is trained. They learn fire/hold and target together; this learns
+fire/hold alone.
 
 ### 2.1 Pipeline
 
@@ -91,7 +100,12 @@ A genuine price-based auction *is* used, but only as a baseline (see below).
   each, identical across every method. All twelve are evaluated zero-shot.
 - **Hardware.** RTX 5080 (16 GB), Ryzen 9 9900X, Windows 11, Python 3.12,
   CUDA 12.8. About two hours per seed for 400 training steps.
-- **Seeds.** Three (5, 6, 7).
+- **Seeds.** Three (5, 6, 7) in the current tables. A ten-seed rerun is in
+  progress (`run_ten_seeds.sh`, log in `result/ten_seeds_run.log`).
+- **Checkpoint selection.** Now runs on a validation set drawn at training
+  scale (`M,N,T in [5,7]`, 20 instances, `VAL_SEED = 7717`). The twelve test
+  configurations at seed 123 play no part in which checkpoint is kept. The
+  three-seed tables predate this and were selected on the test instances.
 
 ### Baselines
 
@@ -283,25 +297,36 @@ largest overfull box under 6 pt.
 
 ---
 
-## 7. Open issues
+## 7. Reviewer-response status
 
-1. **Checkpoint selection uses the test instances.** Training evaluates on the
-   twelve held-out configurations at `EVAL_SEED = 123` and keeps the best
-   checkpoint; `eval_final_table.py` then reports on `SEED = 123`, the same
-   instances. Model selection is therefore done on the reported test set. The
-   cheap fix is to re-select on a different seed (about 6 h of retraining);
-   re-running everything on a new seed costs about 16 h because of SCIP alone.
-   Deliberately left as is.
-2. **Prose voice.** Large parts of the current draft were AI-drafted and read
-   that way: uniform sentence length, heavy use of the "not X, but Y" contrast,
-   colon-then-elaboration, and over-signposting ("Two patterns matter", "The
-   reason is structural"). The abstract and introduction are being rewritten
-   by the author.
-3. **The vectorized assignment is not reflected in reported training runs.**
-   Results are identical so no retraining is required, but any fresh run will
-   simply be faster.
+A simulated hostile review (Reviewer 1) was worked through point by point.
 
----
+| Point | Status |
+|---|---|
+| 1.1 novelty | Answered by repositioning. Abstract and introduction now lead with the criterion; contribution 1 retitled "A criterion for where to cut a learned pipeline" |
+| 1.2 theory scope | `rem:scope` in `method.tex`: bounds are per-component and do not compose; the learned policy has no guarantee, and `prop:myopic-gap` says none is possible from within a stage |
+| 1.3 why RL | Answered by position: the paper never claims RL is best, and the SCIP appendix shows exact solving winning wherever it finishes |
+| 1.4 RL vs local search | Already in the data. Greedy (our assignment, no learned fire/hold) 0.490 vs ours 0.122 is the learned decision; 0.122 to 0.116 is the search. Stated explicitly in Main Results |
+| 1.5 checkpoint selection | Fixed in code; ten-seed rerun in progress |
+| 1.6 three seeds | Ten-seed rerun in progress |
+| 1.7 baseline fairness | Appendix table added. AM draws 85x and POMO 21x the training instances we do. AM still at 0.69M params; retrain with 6 encoder layers to bring every method to about 1.3M |
+| 1.8 extrapolation | Deliberately not expanded: the facts are already visible in Setup and the table, and a classification table invites follow-up demands |
+| 3.1 / 3.2 guarantee and auction terminology | Done |
+| 3.3 narrow neighborhood | Conclusion already reports richer operators tried and not better |
+| 3.4 learned-editor space | Left to the author |
+| 3.5 scalar fire-logit | To run after the ten seeds: 1-2 seeds of a single-logit head, decide from the result |
+| 3.6 runtime accounting | Timing caption now states what is measured and that ours is K=0 |
+| 3.7 SCIP optimality | Appendix added: closes 26/30 Small instances, almost nothing above (15,15,5) |
+| 3.8 paired tests | Not done; needs per-instance values saved |
+
+Still open and deliberate:
+
+- **Prose voice.** Much of the draft was AI-drafted. The author is rewriting
+  the abstract and introduction from the current drafts.
+
+After the ten seeds finish, in order: evaluate all ten on seed 123 and update
+Table 4, Limitations and the trace appendix; run the scalar fire-logit
+comparison; retrain AM at six encoder layers.
 
 ## 8. Where things are
 
