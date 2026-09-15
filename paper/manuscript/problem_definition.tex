@@ -1,0 +1,80 @@
+\section{Problem Formulation}
+\label{sec:problem}
+
+DWTA extends the static problem over a horizon of discrete stages
+$t = 1, 2, \ldots, T$. At each stage, every weapon either fires one round at a
+single target or holds. A weapon that fires becomes unavailable for a fixed
+number of stages, spends one round of a finite magazine, and may only engage
+targets that are currently exposed. The
+static problem has none of these features, and they are what make the choice
+to hold fire meaningful: a round spent now is a round unavailable later.
+
+The objective is to minimize the total value of the targets that survive the
+engagement. The model rests on the following assumptions.
+
+\begin{itemize}
+    \item A weapon fires at most one round per stage, at a single target.
+    Several weapons may engage the same target in the same stage.
+    \item Weapon $m$ requires a reload time $D_m$. After firing, it cannot
+    fire again for $D_m$ stages.
+    \item Weapon $m$ carries $A_m$ rounds for the entire horizon.
+    \item Target $n$ is exposed only during its time window $TW_n$, which runs
+    from $t_{n,\text{start}}$ to $t_{n,\text{end}}$, and cannot be engaged
+    outside it.
+    \item A hit by weapon $m$ removes a fixed proportion $P_{m,n}$ of the
+    remaining value of target $n$. Hits therefore compound multiplicatively,
+    and each additional hit on the same target is worth less than the one
+    before it.
+\end{itemize}
+
+Table~\ref{tab:notation} lists the notation. The two state variables
+$w_{m,t}$ and $a_{m,t}$ track reload and ammunition from stage to stage.
+
+\begin{table}[H]
+\centering
+\small
+\caption{Notation for the mathematical model.}
+\label{tab:notation}
+\begin{tabular}{lp{6.5cm}}
+\hline
+\textbf{Sets} & \\
+$M$ & Set of weapons, indexed by $m = 1, \ldots, M$ \\
+$N$ & Set of targets, indexed by $n = 1, \ldots, N$ \\
+$T$ & Set of stages, indexed by $t = 1, \ldots, T$ \\
+\hline
+\textbf{Parameters} & \\
+$V_n$ & Initial value of target $n$ \\
+$D_m$ & Reload time of weapon $m$, in stages \\
+$A_m$ & Rounds available to weapon $m$ over the horizon \\
+$TW_n$ & Time window during which target $n$ is exposed \\
+$P_{m,n}$ & Proportion of target $n$'s remaining value removed by a hit from weapon $m$ \\
+\hline
+\textbf{Decision Variables} & \\
+$x_{m,n,t}$ & $1$ if weapon $m$ engages target $n$ at stage $t$, $0$ otherwise \\
+$w_{m,t}$ & Stages remaining before weapon $m$ is ready again \\
+$a_{m,t}$ & Rounds remaining to weapon $m$ at stage $t$ \\
+\hline
+\end{tabular}
+\end{table}
+
+Each hit on target $n$ scales its remaining value by $(1 - P_{m,n})$, so the
+value surviving the engagement is a product over all hits the target
+receives, and the objective is
+\begin{equation}\label{eq:objective_function}
+    \min \sum_{n=1}^{N} V_{n} \prod_{t=1}^{T} \prod_{m=1}^{M} (1 - P_{m,n})^{x_{m,n,t}},
+\end{equation}
+subject to the assumptions above. \ref{app:model} states them as constraints
+and gives the full nonlinear integer program.
+
+At a given stage, the reload, ammunition and time-window constraints leave
+each weapon a set of targets it may engage,
+\begin{equation}\label{eq:legal-set}
+    \mathcal{L}_{m,t} = \{\, n : t \in TW_n \,\} \quad \text{if } w_{m,t} = 0 \text{ and } a_{m,t} \geq 1, \qquad \mathcal{L}_{m,t} = \emptyset \ \text{otherwise}.
+\end{equation}
+This set is what the policy of Section~\ref{sec:method} is masked to.
+
+The objective is nonlinear in the assignment variables, and the reload and
+ammunition state couples the stages: a round fired at stage $t$ removes value
+now and removes an option later. That coupling is the part of the problem no
+single-stage rule can reason about, and Section~\ref{sec:participation-theory} makes the
+consequence precise.

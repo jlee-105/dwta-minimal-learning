@@ -1,0 +1,11 @@
+[OK] All hyperparameters validated successfully!
+   Problem size: 5W x 5T, MAX_TIME=5
+   Model: EMBEDDING_DIM=128, HEAD_NUM=8
+   Training: 200 epochs, 5 episodes/epoch
+Using CUDA GPU
+5M_5N_5T: stages=38  mean=0.9939  min=0.8711  share_optimal=0.00%
+5M_7N_5T: stages=39  mean=0.9918  min=0.8782  share_optimal=0.00%
+5M_15N_5T: stages=43  mean=0.9973  min=0.9496  share_optimal=0.00%
+
+ALL: stages=120  mean=0.9944  min=0.8711  share_optimal=0.00%
+(ratio = f_t(auction) / exact OPT_t(F); guarantee floor is 0.5)

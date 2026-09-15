@@ -1,0 +1,69 @@
+\section{Markov Decision Process Formulation}
+\label{sec:mdp}
+
+% Formulations of this problem conventionally give the policy the full
+% per-stage decision: which target, if any, each weapon engages. Section~\ref{sec:auction} shows that half of this decision, target assignment given a set of firing weapons, admits a mechanism with a
+% provable approximation guarantee and no learning at all.
+We define the MDP so that the policy is only ever asked whether each weapon fires this stage. An MDP, $\mathcal{M}$, is represented as a 5-tuple:
+\begin{equation}
+\mathcal{M} = (\mathcal{S}, \mathcal{A}, \mathcal{T}, R, \gamma)
+\end{equation}
+where $\mathcal{S}$ is the state space, $\mathcal{A}$ the action space,
+$\mathcal{T}$ the transition kernel, $R$ the reward function, and $\gamma$
+the discount factor.
+
+\begin{itemize}
+\item \textbf{State ($s_t$)}: for every (weapon, target) pair, the
+nine quantities
+\begin{equation}
+\label{eq:state}
+s_t = [u_t;\, v_t;\, d_t;\, r_t;\, \alpha_t;\, f_t;\, ws;\, we;\, p] \in \mathbb{R}^9,
+\end{equation}
+namely weapon readiness $u_t$, remaining target value $v_t$, remaining reload
+time $d_t$, remaining time to horizon $r_t$, remaining ammunition $\alpha_t$,
+cumulative hits on the target $f_t$, the window bounds $ws$ and $we$, and the
+damage rate $p = P_{m,n}$. Section~\ref{sec:encoding} encodes these as a
+heterogeneous graph rather than as $M \times N$ independent vectors.
+
+\item \textbf{Action ($a_t$)}: a \emph{binary} per-weapon participation
+decision,
+\begin{equation}
+\label{eq:binary-action}
+a_t = (a_{1,t}, \ldots, a_{M,t}) \in \{0,1\}^M, \qquad a_{m,t} = 1 \iff m \text{ fires at } t,
+\end{equation}
+rather than a choice of target. This is the entire output the policy is
+responsible for: $2^M$ joint actions per stage, against the
+$\prod_m (|\mathcal{L}_{m,t}|+1)$ a target-selecting formulation would have to choose from.
+
+\item \textbf{Transition}: given $a_t$, the environment (not the policy)
+determines the realized engagement. The set of firing weapons
+$F_t = \{m : a_{m,t}=1\}$ is passed to a fixed assignment routine
+\begin{equation}
+\label{eq:auction-call}
+x_t = \textsc{Assign}(F_t, s_t),
+\end{equation}
+which gives each $m \in F_t$ one target, choosing greedily by the value a
+shot would destroy at the current state. It is deterministic, has no learned
+parameters, and is defined in full in Section~\ref{sec:auction}. A weapon in
+$F_t$ with no legal target is a no-op regardless of $a_{m,t}$. The transition
+$\mathcal{T}(s_{t+1} \mid s_t, a_t)$ is therefore deterministic once $a_t$
+is fixed, but it is not simply ``apply $a_t$'': it composes the policy's
+binary decision with the fixed assignment rule.
+
+\item \textbf{Reward}:
+\begin{equation}
+R(s_{t+1} \mid s_t, a_t) = \frac{C(s_t) - C(s_{t+1})}{C(s_0)},
+\end{equation}
+where $C(s_t)$ is the sum of remaining target values at $s_t$, realized
+through the assigned engagement rather than a directly-specified one.
+\end{itemize}
+
+This factoring of the decision, learn participation and delegate assignment,
+is what Section~\ref{sec:method} implements, and what
+Section~\ref{sec:participation-theory}'s myopic-gap proposition argues cannot be
+undone: the assignment rule alone, applied to \emph{every} weapon with a
+positive marginal value each stage, is a valid (if unlearned) participation
+rule, and
+Proposition~\ref{prop:myopic-gap} shows it can be arbitrarily far from
+optimal. The gap between that myopic rule and the optimal one is exactly
+what Eq.~\eqref{eq:binary-action}'s policy is trained to close.

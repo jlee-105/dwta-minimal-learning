@@ -1,0 +1,64 @@
+\section{Related Work}
+\label{sec:related}
+
+WTA was introduced by Manne~\cite{manne1958target} and is NP-hard even in its static form~\cite{lloyd1986weapons}. Early approaches made the problem tractable through linearization or assumptions such as identical weapons~\cite{day1966allocating,firstman1960approximating,hodson1971linear,bracken1968selected,denbroeder1959optimum}. Exact methods can now certify optimality for moderate static instances, with specialized branch-and-bound methods reaching instances as large as $80\times80$~\cite{ahuja2007exact}. Their computational cost, however, increases sharply beyond that scale~\cite{johansson2009empirical,kline2019weapon}. Heuristics and metaheuristics~\cite{kolitz1988analysis,lee2002immunity,lee2003efficiently,lee2003genetic,durgut2017artificial,sonuc2017parallel,chang2018solving,metler1990suite} provide faster solutions, but are typically designed around specific constraint structures. These limitations motivate methods that can provide fast and repeatable decisions across large and varying problem instances.
+
+Learning-based methods offer an alternative by shifting computational effort to training and producing subsequent decisions through relatively inexpensive forward passes. However, a learned approach must still determine how much of the decision process should be performed by the network itself. Three design choices are particularly relevant to this question. First, should decisions within a stage be generated sequentially or simultaneously? Second, should the network construct the entire decision or delegate part of it to a classical optimization routine? Third, once a solution has been constructed, should improvement be learned or handled by a fixed search procedure? The following literature is organized around these three choices.
+
+\paragraph{Sequential versus simultaneous decision making.}
+Neural combinatorial optimization has predominantly adopted sequential solution construction. Pointer networks and attention-based models construct solutions one element at a time, conditioning each decision on those made previously~\cite{vinyals2015pointer,kool2018attention,kwon2020pomo}. Sequential construction naturally provides coordination among decisions, but requires repeated network evaluations as the number of decision makers increases. Simultaneous decision making removes this sequential computational cost but introduces the need to coordinate independent decisions. Several multi-agent learning approaches address this issue through learned communication. CommNet aggregates and broadcasts learned messages~\cite{sukhbaatar2016commnet}, while TarMAC uses attention to determine which agents should communicate with one another~\cite{das2019tarmac}. Pointer-style architectures have also been used to convert the resulting representations into discrete decisions~\cite{park2021schedulenet}. In vehicle routing, where multiple vehicles may compete for the same customer, PARCO introduces a learned priority-based mechanism to resolve such conflicts~\cite{parco2024}.
+
+Multi-agent reinforcement learning has more commonly retained sequential action generation. The multi-agent advantage decomposition framework expresses the joint advantage as a sum of per-agent advantages conditioned on the actions of preceding agents, enabling sequential policy optimization with monotonic improvement guarantees. HATRPO and HAPPO build directly on this framework~\cite{kuba2022trust}, while the Multi-Agent Transformer incorporates the sequential structure through autoregressive action generation~\cite{wen2022mat}. Subsequent work has also considered how the ordering of agents should be selected~\cite{wen2022mat}. These approaches highlight the importance of coordination when multiple agents make discrete resource-allocation decisions. Our framework reaches the same end by a different route: rather than ordering the agents, it removes target selection from them entirely, and the assignment guarantee of Proposition~\ref{prop:auction-half} then holds however the participating agents were chosen.
+
+\paragraph{Learning versus classical decision mechanisms.}
+The second design choice concerns whether the network should produce the entire decision or delegate part of it to a classical procedure. Such hybrid designs have been explored in several learning-based optimization settings. Delarue et al.\ embed an optimization subproblem directly into policy action selection~\cite{delarue2020rl}, while reinforcement learning has also been used to determine bidding values within an auction mechanism~\cite{sun2026grabbing}. Our framework follows this general principle but uses the structure of DWTA to determine where the decision should be divided.
+
+Specifically, the target-assignment component admits a per-stage approximation guarantee: the auction mechanism obtains at least one half of the optimal assignment value (Proposition~\ref{prop:auction-half}). In contrast, the participation decision cannot be assigned an analogous per-stage guarantee, because a decision based only on current-stage information can be arbitrarily suboptimal when future engagements are considered (Proposition~\ref{prop:myopic-gap}). We therefore delegate target assignment to the classical auction mechanism while learning the participation decision. The decomposition is thus motivated by the properties that can be established for each component rather than solely by implementation convenience.
+
+This decomposition also changes the role of simultaneous decision making. Existing communication and sequential-decoding methods primarily address coordination among agents competing for resources. In our framework, the neural policy does not select targets; instead, it produces a participation decision for each weapon, after which the auction determines the corresponding assignment from the stage state. Consequently, the target preferences that produce the $\Theta(1/M)$ worst-case loss in simultaneous target selection are not used by the policy (Remark~\ref{rem:auction-kills-pileon}). The coordination problem associated with simultaneous target selection is therefore removed rather than learned around. This allows simultaneous participation decisions while retaining the assignment guarantee provided by the auction.
+
+\paragraph{Learning versus fixed improvement.}
+A third line of work focuses on improving an already constructed solution rather than learning the complete construction process. Neural local-rewriting methods repeatedly propose modifications to an existing solution and accept changes according to an improvement criterion~\cite{chen2019rewriter}. Related approaches include learned improvement heuristics for routing~\cite{wu2021improvement} and dual-aspect representations for local improvement~\cite{ma2021dact}. Zhang, Hu, and Zhao use a similar pipeline for vehicle routing with time windows, combining an attention-based construction policy with classical large-neighbourhood search~\cite{zhang2025vrptw}.
+
+We investigated the same idea for DWTA by training a schedule-editing policy that scores every stage-weapon slot and selects the highest-scoring slot to flip. In our experiments, the learned selector accounted for only 24\% of the observed improvement, while uniformly random slot selection under the same re-simulation budget and acceptance rule reproduced the remaining 76\%. Under a strictly improving acceptance rule, the learned ordering was even worse than random selection. This result concerns the specific edit operator used in our framework rather than the cited methods, whose problem settings and operators differ. In our case, the edit space consists of a single binary participation decision for each stage-weapon pair, leaving relatively little additional structure for a learned selector to exploit. These observations motivate the use of a fixed hill-climbing procedure rather than a second learned network.
+
+\paragraph{Reinforcement learning for weapon-target assignment.}
+The reinforcement-learning literature on WTA provides a more direct comparison with our framework. Early neural formulations date to Wacholder~\cite{wacholder1989neural}. More recent approaches can be distinguished according to whether they address dynamic settings, support variable problem sizes, and incorporate the operational constraints relevant to DWTA. Table~\ref{tab:related} summarizes these characteristics.
+
+For static WTA, several approaches either use architectures whose dimensions depend on the instance size~\cite{meng2021deep,shin2020mean,gaudet2023} or achieve size-agnostic architectures by simplifying the operational setting, such as omitting relevant constraints or assuming identical weapons~\cite{luo2021learning,na2023weapon,vinyals2015pointer}. Dynamic approaches similarly retain at least one of these limitations, including size-fixed architectures~\cite{wu2022dynamic}, simplified objectives based on identical agents~\cite{hu2024}, or receding-horizon decompositions that do not learn a cross-stage policy~\cite{zhang2020efficient,zhang2020dynamic}.
+
+Closest to our work, Yoon, Lee, and Cho~\cite{yoontransformer} consider scalable dynamic WTA using a transformer-based policy. Our approach differs in two main respects. First, the policy predicts participation rather than directly selecting a target. Second, we provide a theoretical characterization of when delegating target assignment to a fixed rule is safe (Section~\ref{sec:auction}). More recently, Oh et al.~\cite{oh2026combat} combine graph neural networks with reinforcement learning for dynamic WTA, using a graph-attention policy trained with PPO under a partially observable formulation and evaluating naval and ground scenarios against heuristic and metaheuristic baselines. Their emphasis is on scenario realism through the OODA decision cycle, whereas our focus is on decomposing the per-stage decision into a learned participation policy and a classical assignment mechanism with a per-stage approximation guarantee. We further evaluate this framework against an exact solver and neural construction baselines.
+
+Overall, existing reinforcement-learning approaches to WTA generally assume that the learned policy directly produces the complete per-stage assignment decision. Our framework instead separates the decision into participation and target assignment, learns only the component that requires cross-stage reasoning, and delegates the remaining component to a classical mechanism with a provable per-stage guarantee.
+
+%% NOTE 2026-08-23: JDMS full text inaccessible (SAGE 403); published abstract (framework "ARFA") does not
+%% disambiguate sequential vs simultaneous decoding. The single-sequential-policy characterization stands on
+%% the co-author's (J. Lee's) own description in this manuscript's Method overview; final confirmation at
+%% proof stage costs one glance at the published paper. Bib entry updated with year 2025 + doi.
+%% CITATION STATUS 2026-08-23: (a) Oh et al. IEEE T-Cyb verified via Crossref (vol. 56, no. 2, pp. 631-643, 2026,
+%% doi 10.1109/TCYB.2025.3610606; TechRxiv preprint 10.36227/techrxiv.171084935.57702557) and cited in prose above
+%% using only abstract-verifiable claims (DWTA, GNN+PPO, POMDP, OODA, heuristic/metaheuristic baselines). NOT added
+%% to Table~\ref{tab:related}: the sequential-vs-parallel and constraint axes could not be verified (full text
+%% paywalled, preprint mirrors blocked) and must not be assumed. (b) the "Control Theory & Applications 2025" item
+%% previously noted here could not be located under that title in Crossref or web search: it appears to have been
+%% a garbled duplicate of (a); dropped.
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Reinforcement-learning approaches to weapon-target assignment along the axes that position this work.}
+\label{tab:related}
+\begin{tabular}{l|ccc}
+\hline
+\textbf{Method} & \textbf{Dynamic} & \textbf{Size-agn.} & \textbf{Parallel dec.} \\ \hline
+Meng et al.~\cite{meng2021deep} & -- & -- & -- \\
+Shin et al.~\cite{shin2020mean} & -- & -- & -- \\
+Luo et al.~\cite{luo2021learning} & -- & \checkmark & -- \\
+Na \& Choi~\cite{na2023weapon} & -- & \checkmark & -- \\
+Gaudet et al.~\cite{gaudet2023} & -- & -- & -- \\
+Wu et al.~\cite{wu2022dynamic} & \checkmark & -- & -- \\
+Hu et al.~\cite{hu2024} & \checkmark & \checkmark & -- \\
+Yoon et al.~\cite{yoontransformer} & \checkmark & \checkmark & -- \\ \hline
+\textbf{This work} & \checkmark & \checkmark & \checkmark \\ \hline
+\end{tabular}
+\end{table}

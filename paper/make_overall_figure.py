@@ -1,138 +1,143 @@
 """
-Draw the SCoPE pipeline figure referenced as figure/Overall.png.
+Draw the pipeline figure referenced as figure/Overall.png.
 
-Two bands, matching Algorithm 1 in the manuscript:
-  Pass 1 (construction) -- the four-step cycle repeated once per stage,
-      with the environment transition closing the loop.
-  Pass 2 (repair)       -- score / flip / re-simulate / keep-best, repeated
-      K times on the assembled schedule.
+Rewritten 2026-09-13 to show the overall vision as the four things the method
+actually is:
+  (1) the problem expressed as a weapon-target graph and embedded by a GNN,
+  (2) reinforcement learning deciding which weapons fire,
+  (3) the auction deciding what each firing weapon engages,
+  (4) refinement of the completed schedule.
 
-Grayscale-safe: fills are light grays, emphasis is by border weight, not hue.
-Journals still print this page in black and white.
+(1) draws a real bipartite graph rather than a box labelled "encoder", because
+the graph representation is part of the claim, not an implementation detail.
+Steps (1) to (3) repeat once per stage; (4) runs once, over the whole
+schedule, which is why it sits on its own row.
+
+Grayscale-safe: fills are light grays, emphasis is border weight, not hue.
 """
 import os
 
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from matplotlib.patches import FancyBboxPatch, FancyArrowPatch, Rectangle
+from matplotlib.patches import FancyBboxPatch, FancyArrowPatch, Circle
 
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "figure", "Overall.png")
 
-FILL_LEARNED = "#dcdcdc"   # learned component
-FILL_FIXED = "#f4f4f4"     # non-learned component (auction, environment)
+FILL_LEARNED = "#d2d2d2"
+FILL_FIXED = "#f5f5f5"
 EDGE = "#222222"
+MUTED = "#555555"
+NL = chr(10)
 
-# Figure coordinate system: 10 wide, 6.4 tall.
-fig, ax = plt.subplots(figsize=(9.0, 5.4))
+fig, ax = plt.subplots(figsize=(9.2, 3.9))
 ax.set_xlim(0, 10)
-ax.set_ylim(0, 6.4)
+ax.set_ylim(0, 4.3)
 ax.axis("off")
 
 
-def box(x, y, w, h, title, body, fill, lw=1.3, fontsize=8.2):
-    ax.add_patch(
-        FancyBboxPatch(
-            (x, y), w, h,
-            boxstyle="round,pad=0.02,rounding_size=0.10",
-            linewidth=lw, edgecolor=EDGE, facecolor=fill, zorder=3,
-        )
-    )
-    ax.text(x + w / 2, y + h - 0.24, title, ha="center", va="center",
-            fontsize=fontsize + 0.6, fontweight="bold", zorder=4)
-    ax.text(x + w / 2, y + h / 2 - 0.20, body, ha="center", va="center",
-            fontsize=fontsize, linespacing=1.35, zorder=4)
+def box(x, y, w, h, learned=False):
+    ax.add_patch(FancyBboxPatch((x, y), w, h,
+                                boxstyle="round,pad=0.04,rounding_size=0.08",
+                                linewidth=2.0 if learned else 1.0,
+                                edgecolor=EDGE,
+                                facecolor=FILL_LEARNED if learned else FILL_FIXED,
+                                zorder=2))
 
 
-def arrow(x1, y1, x2, y2, style="-|>", rad=0.0, lw=1.3, ls="-"):
-    ax.add_patch(
-        FancyArrowPatch(
-            (x1, y1), (x2, y2),
-            arrowstyle=style, mutation_scale=13, linewidth=lw, linestyle=ls,
-            color=EDGE, connectionstyle=f"arc3,rad={rad}", zorder=6,
-        )
-    )
+def label(x, y, text, fontsize=9.0, weight="normal"):
+    ax.text(x, y, text, fontsize=fontsize, ha="center", va="center",
+            zorder=3, linespacing=1.35, fontweight=weight)
 
 
-def feedback(x_from, y_box_edge, x_to, y_rail, ls=(0, (4, 3)), lw=1.2):
-    """Loop-back routed through empty space rather than across the boxes:
-    drop out of the last box, run along a clear rail, rise into the first."""
-    ax.plot([x_from, x_from], [y_box_edge, y_rail],
-            color=EDGE, linewidth=lw, linestyle=ls, zorder=6)
-    ax.plot([x_from, x_to], [y_rail, y_rail],
-            color=EDGE, linewidth=lw, linestyle=ls, zorder=6)
-    arrow(x_to, y_rail, x_to, y_box_edge, lw=lw, ls=ls)
+def step_no(x, y, n):
+    ax.text(x, y, "(%d)" % n, fontsize=8.6, ha="center", va="center",
+            color=MUTED, zorder=3, style="italic")
 
 
-def band(x, y, w, h, label):
-    ax.add_patch(
-        Rectangle((x, y), w, h, linewidth=0.9, edgecolor="#999999",
-                  facecolor="none", linestyle=(0, (5, 4)), zorder=1)
-    )
-    ax.text(x + 0.12, y + h - 0.20, label, ha="left", va="center",
-            fontsize=9.0, fontweight="bold", color="#444444", zorder=4)
+def arrow(x1, y1, x2, y2, lw=1.2, ls="-"):
+    ax.add_patch(FancyArrowPatch((x1, y1), (x2, y2), arrowstyle="-|>",
+                                 mutation_scale=11, linewidth=lw, linestyle=ls,
+                                 color=EDGE, zorder=4))
 
 
-# ----------------------------------------------------------------- Pass 1
-band(0.10, 3.22, 9.80, 3.08, "Pass 1  Construction:  one forward pass per stage,  t = 1 ... T")
+Y, H = 2.20, 1.45
 
-BY, BH, BW = 4.34, 1.30, 2.22
-xs = [0.36, 2.78, 5.20, 7.62]
+# ---------------------------------------------- (1) problem as a graph + GNN
+box(0.30, Y, 2.85, H)
+step_no(0.52, Y + H - 0.18, 1)
 
-box(xs[0], BY, BW, BH, "Encode",
-    "heterogeneous\nweapon-target graph\nL message-passing rounds", FILL_LEARNED)
-box(xs[1], BY, BW, BH, "Communicate",
-    "self-attention across\nthe M weapons", FILL_LEARNED)
-box(xs[2], BY, BW, BH, "Commit in parallel",
-    "M pointer policies,\none forward pass:\nfire or hold", FILL_LEARNED)
-box(xs[3], BY, BW, BH, "Auction",
-    "assign targets among\nthe firing weapons", FILL_FIXED)
+# a small bipartite weapon-target graph drawn inside the box
+wx, tx = 1.00, 2.05
+wys = [Y + 1.02, Y + 0.74, Y + 0.46]
+tys = [Y + 1.02, Y + 0.74, Y + 0.46]
+for wy in wys:
+    for ty in tys:
+        ax.plot([wx, tx], [wy, ty], color="#999999", lw=0.6, zorder=2.5)
+for wy in wys:
+    ax.add_patch(Circle((wx, wy), 0.085, facecolor="white", edgecolor=EDGE,
+                        lw=1.0, zorder=3))
+for ty in tys:
+    ax.add_patch(Circle((tx, ty), 0.085, facecolor="#bbbbbb", edgecolor=EDGE,
+                        lw=1.0, zorder=3))
+ax.text(wx, Y + 1.20, "weapons", fontsize=7.8, ha="center", va="center",
+        color=MUTED, zorder=3)
+ax.text(tx, Y + 1.20, "targets", fontsize=7.8, ha="center", va="center",
+        color=MUTED, zorder=3)
+label(1.72, Y + 0.20, "GNN embedding", fontsize=9.0)
 
-for i in range(3):
-    arrow(xs[i] + BW, BY + BH / 2, xs[i + 1], BY + BH / 2)
+# ------------------------------------------------------ (2) learned decision
+box(3.55, Y, 2.35, H, learned=True)
+step_no(3.77, Y + H - 0.18, 2)
+label(4.72, Y + 0.80, "Reinforcement" + NL + "learning decides" + NL
+      + "which weapons fire")
+label(4.72, Y + 0.28, "$a_{m,t} \\in \\{0,1\\}$", fontsize=9.4)
 
-# Environment transition closing the construction loop, routed below the row.
-feedback(xs[3] + BW / 2, BY, xs[0] + BW / 2, 3.86)
-ax.text(5.0, 3.52, "environment step:  apply hits,  spend ammunition,  "
-                   "start reload clocks,  advance time windows",
-        ha="center", va="center", fontsize=8.0, style="italic", color="#333333")
+# -------------------------------------------------------------- (3) auction
+box(6.30, Y, 2.35, H)
+step_no(6.52, Y + H - 0.18, 3)
+label(7.47, Y + 0.80, "Auction decides" + NL + "what each firing" + NL
+      + "weapon engages")
+label(7.47, Y + 0.28, "no learned parameters", fontsize=8.2)
 
-# Legend, kept clear of the row and of the band title.
-ax.text(6.30, 6.03, "learned", fontsize=7.8, color="#333333", ha="left", va="center")
-ax.add_patch(Rectangle((7.02, 5.94), 0.32, 0.18, facecolor=FILL_LEARNED,
-                       edgecolor=EDGE, linewidth=0.9, zorder=3))
-ax.text(7.62, 6.03, "not learned", fontsize=7.8, color="#333333", ha="left", va="center")
-ax.add_patch(Rectangle((8.72, 5.94), 0.32, 0.18, facecolor=FILL_FIXED,
-                       edgecolor=EDGE, linewidth=0.9, zorder=3))
+arrow(3.15, Y + H / 2, 3.55, Y + H / 2)
+arrow(5.90, Y + H / 2, 6.30, Y + H / 2)
 
-# -------------------------------------------------- hand-off between passes
-arrow(5.00, 3.22, 5.00, 2.86, lw=1.6)
-ax.text(5.16, 3.04, "complete, feasible schedule", ha="left", va="center",
-        fontsize=8.4, style="italic")
+ax.text(5.0, 4.05, "Repeated once per stage $t = 1 \\ldots T$",
+        fontsize=9.2, style="italic", color=MUTED, ha="center", va="center")
 
-# ----------------------------------------------------------------- Pass 2
-band(0.10, 0.16, 9.80, 2.66, "Pass 2  Learned repair:  K edits,  best schedule retained")
+# next-stage feedback, routed below the row through empty space
+lane = Y - 0.45
+ax.plot([7.80, 7.80], [Y, lane], color=EDGE, lw=1.0, ls=(0, (4, 2)), zorder=1)
+ax.plot([7.80, 1.30], [lane, lane], color=EDGE, lw=1.0, ls=(0, (4, 2)), zorder=1)
+arrow(1.30, lane, 1.30, Y, lw=1.0, ls=(0, (4, 2)))
+ax.text(3.30, lane - 0.19, "apply the shots, then next stage", fontsize=8.4,
+        style="italic", color=MUTED, ha="center", va="center")
 
-RY, RH, RW = 0.62, 1.30, 2.22
-rxs = [0.36, 2.78, 5.20, 7.62]
+# ----------------------------------------------------------- (4) refinement
+arrow(8.85, Y - 0.02, 8.85, 1.02, lw=1.4)
+ax.text(8.70, 1.30, "completed schedule", fontsize=8.4, ha="right",
+        va="center", color=EDGE)
 
-box(rxs[0], RY, RW, RH, "Score slots",
-    "repair policy rates\nall T x M\nstage-weapon slots", FILL_LEARNED)
-box(rxs[1], RY, RW, RH, "Flip one slot",
-    "highest-scoring slot\nswitches fire and hold", FILL_LEARNED)
-box(rxs[2], RY, RW, RH, "Re-simulate",
-    "replay the episode;\nfeasibility recomputed,\nnot patched", FILL_FIXED)
-box(rxs[3], RY, RW, RH, "Keep best",
-    "return the best\nschedule seen;\nnever worse than the\nconstructed one", FILL_FIXED)
+box(0.30, 0.20, 9.40, 0.82)
+step_no(0.52, 0.86, 4)
+label(5.00, 0.61, "Refinement: flip one stage-weapon decision, re-simulate, "
+      "keep it only if the objective improves." + NL
+      + "Repeated up to $K$ times. No network call anywhere in this loop.")
 
-for i in range(3):
-    arrow(rxs[i] + RW, RY + RH / 2, rxs[i + 1], RY + RH / 2)
+# ------------------------------------------------------------------- legend
+lx, ly = 0.30, 3.97
+ax.add_patch(FancyBboxPatch((lx, ly), 0.26, 0.16,
+                            boxstyle="round,pad=0.02,rounding_size=0.04",
+                            linewidth=2.0, edgecolor=EDGE,
+                            facecolor=FILL_LEARNED, zorder=5))
+ax.text(lx + 0.36, ly + 0.08, "learned", fontsize=8.4, va="center", zorder=5)
+ax.add_patch(FancyBboxPatch((lx + 1.25, ly), 0.26, 0.16,
+                            boxstyle="round,pad=0.02,rounding_size=0.04",
+                            linewidth=1.0, edgecolor=EDGE,
+                            facecolor=FILL_FIXED, zorder=5))
+ax.text(lx + 1.61, ly + 0.08, "fixed", fontsize=8.4, va="center", zorder=5)
 
-feedback(rxs[3] + RW / 2, RY + RH, rxs[0] + RW / 2, 2.22)
-ax.text(5.0, 2.42, "repeat until the edit budget K is spent", ha="center",
-        va="center", fontsize=8.0, style="italic", color="#333333")
-
-fig.tight_layout(pad=0.3)
 os.makedirs(os.path.dirname(OUT), exist_ok=True)
-fig.savefig(OUT, dpi=300, facecolor="white")
-print("wrote", OUT)
+fig.savefig(OUT, dpi=300, bbox_inches="tight", facecolor="white")
+print("wrote %s" % OUT)

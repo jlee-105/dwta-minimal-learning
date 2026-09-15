@@ -1,0 +1,51 @@
+\section{Optimization model}
+\label{app:model}
+
+This appendix states DWTA as a nonlinear integer program in the notation of
+Table~\ref{tab:notation}. The objective is Eq.~\eqref{eq:objective_function}.
+The exact-solver baseline of Section~\ref{sec:results} solves an equivalent
+formulation of this model.
+
+A weapon fires at most one round per stage:
+\begin{equation}\label{eq:weapon_target_constraint}
+    \sum_{n=1}^{N} x_{m,n,t} \leq 1, \quad \forall m, t.
+\end{equation}
+
+Reload is enforced by the readiness counter $w_{m,t}$. Firing resets the
+counter to $D_m$, which then decrements by one each stage, and a weapon may
+fire only when the counter has reached zero:
+\begin{equation}\label{eq:wait_time_update}
+    w_{m,t+1} = \max\left(0,\ w_{m,t} - 1\right) + D_{m} \sum_{n=1}^{N} x_{m,n,t}, \quad \forall m, t,
+\end{equation}
+\begin{equation}\label{eq:weapon_readiness}
+    D_{m} \sum_{n=1}^{N} x_{m,n,t} \leq D_{m} - w_{m,t}, \quad \forall m, t.
+\end{equation}
+
+Ammunition is tracked the same way. The magazine decrements with every round
+fired and bounds what can be fired at the current stage:
+\begin{equation}\label{eq:ammunition_usage}
+    a_{m,t+1} = a_{m,t} - \sum_{n=1}^{N} x_{m,n,t}, \quad \forall m, t,
+\end{equation}
+\begin{equation}\label{eq:ammunition_constraint}
+    \sum_{n=1}^{N} x_{m,n,t} \leq a_{m,t}, \quad \forall m, t.
+\end{equation}
+
+A target can be engaged only while it is exposed:
+\begin{equation}\label{eq:target_time_window}
+    x_{m,n,t} = 0, \quad \text{if } t \notin TW_n, \quad \forall m, n.
+\end{equation}
+
+Variable domains and initial conditions. Every weapon starts ready and with a
+full magazine:
+\begin{equation}\label{eq:binary_assignment}
+    x_{m,n,t} \in \{0,1\}, \quad \forall m, n, t,
+\end{equation}
+\begin{equation}\label{eq:wait_time_bounds}
+    w_{m,t} \in \mathbb{Z}_{+}, \quad 0 \leq w_{m,t} \leq D_{m}, \quad \forall m, t,
+\end{equation}
+\begin{equation}\label{eq:remaining_ammunition_integer}
+    a_{m,t} \in \mathbb{Z}_{+}, \quad \forall m, t,
+\end{equation}
+\begin{equation}\label{eq:initial_availability}
+    w_{m,1} = 0, \quad a_{m,1} = A_m, \quad \forall m.
+\end{equation}

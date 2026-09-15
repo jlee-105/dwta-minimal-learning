@@ -1,0 +1,71 @@
+\section{Conclusion}
+\label{sec:conclusion}
+
+%% [MOVE 1 — CLOSE THE LOOP] The introduction asked how much of the per-stage
+%% decision actually needs learning. Answer it directly.
+This paper asked how much of the DWTA per-stage decision a learned policy
+actually needs to make. The answer is one bit per weapon per stage. Given the
+set of weapons that fire, assigning targets among them is monotone submodular
+maximization under a partition matroid, which a many-to-one greedy rule on
+exact marginal values solves to within half the stage optimum without
+training (Proposition~\ref{prop:auction-half}); and because that guarantee
+holds for any firing set, it holds for one produced by all weapons deciding
+at once, which is why our simultaneous decoder needs neither a conflict
+handler nor a communication layer to match what sequential decoding would
+have guaranteed (Remark~\ref{rem:auction-kills-pileon}). What cannot be
+delegated is the decision to hold: its value is zero within the stage and
+realized only later, and any rule that optimizes the current stage destroys
+an arbitrarily small fraction of the optimum on instances where a window
+closes (Proposition~\ref{prop:myopic-gap}). Learning that decision alone, and
+training it against the objective a fixed local search produces rather than
+its own raw output, reduced the mean objective by 14.9\% relative to the
+strongest alternative we trained, across twelve held-out configurations
+spanning an order of magnitude in scale.
+
+%% [MOVE 2 — SO WHAT] Transferable lessons, phrased as things another
+%% practitioner can act on.
+Two results transfer past DWTA. The first is a criterion for where to cut a
+learned pipeline: give the classical subroutine the part of the decision that
+admits a per-stage approximation guarantee and keep for the learner the part
+for which no per-stage guarantee exists even in principle. That criterion is
+checkable before any training run, and in our case it identified a decision
+boundary that a natural end-to-end design had obscured. The second is a
+control that improvement-learning pipelines should report and, in our reading
+of the literature, generally do not: because a keep-best or
+accept-if-improving rule makes any proposal distribution monotonically
+non-degrading, the comparison that establishes a learned proposer's value is
+against a uniformly random proposer at matched re-simulation budget, not
+against the unimproved base. Running that control on our own learned editor
+was what led us to delete it; a fixed hill-climbing search proved cheaper
+and better (Section~\ref{sec:local-search}).
+
+%% [MOVE 3 — LIMITS] Honest boundaries.
+Several limits bound these claims. Results are reported over three seeds, and
+while the across-seed spread is small (standard deviation between 0.000 and
+0.002, below the gap to every competing method at every configuration), three
+seeds is a thin basis for the closest per-configuration calls. A sequential
+decoder still edges ahead at two configurations, by 0.005 and 0.004, and POMO
+at one, by 0.007. Training exhibits
+the early-peak-then-oscillate behaviour common to every method we trained on
+this problem, so the reported checkpoint is selected by best held-out
+performance during training rather than final step; we state this openly and
+report the full evaluation trace rather than the peak alone, but it remains a
+selection procedure that a single-run reader cannot verify. The fire
+probability is computed from per-target scores as well as a hold score
+(Eq.~\eqref{eq:hold-prob}); a head with a single scalar fire-logit per weapon
+would be simpler still, and we have not tested it. Finally, the local search's operator is a single participation flip.
+Richer operators we tested earlier, including one that reschedules a shot
+between stages, did not outperform it, but the space is not exhausted.
+
+%% [MOVE 4 — OPEN QUESTIONS] Questions, not a task list.
+The open questions we consider most worth answering follow from those limits.
+Does the decomposition criterion above identify useful cut points in other
+problems that mix a guaranteed within-epoch allocation with an unguaranteed
+cross-epoch commitment, such as inventory with perishable stock or maintenance scheduling under resource windows, or is the clean separability of DWTA
+unusual? Under what conditions does a learned proposer beat a random one in
+an improvement loop at matched budget; our edit space is one bit wide, and we
+would expect the learned proposer's advantage to grow with the operator's
+arity, but we have not mapped that curve. And since the assignment rule
+supplies a per-stage guarantee while the learned policy supplies none, is there a
+trajectory-level guarantee for the composition, or a characterization of the
+instances on which the participation decision is provably easy?

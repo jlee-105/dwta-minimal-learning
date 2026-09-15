@@ -290,9 +290,10 @@
 
 @techreport{hodson1971linear,
   title={A Linear Programming Approach to Weapon Allocation},
-  author={Hodson, III, William T.},
+  author={Hodson, William T., III},
   year={1971},
-  institution={Air Force Institute of Technology}
+  institution={Air Force Institute of Technology},
+  note={Original bib entry had author/title fields transposed, producing the garbled in-text citation "M. W. T. H. Ill"; corrected here. Verify institution/report number against the original source before final submission.}
 }
 
 @article{lee2003efficiently,
@@ -388,7 +389,8 @@
   title={Operational Research in War and Peace: The British Experience from the 1930s to 1970},
   author={Kirby, Maurice W.},
   year={2003},
-  publisher={Imperial College Press}
+  publisher={Imperial College Press},
+  note={PROPOSED replacement for britannica_operations_research and orhistory per reviewer R4 comment; verify citation details before use.}
 }
 
 @article{johansson2011mixed,
@@ -775,20 +777,4 @@
   pages={67--96},
   year={1989},
   publisher={Springer}
-}
-
-@inproceedings{wen2022mat,
-  title     = {Multi-Agent Reinforcement Learning is a Sequence Modeling Problem},
-  author    = {Wen, Muning and Kuba, Jakub Grudzien and Lin, Runji and Zhang, Weinan and Wen, Ying and Wang, Jun and Yang, Yaodong},
-  booktitle = {Advances in Neural Information Processing Systems},
-  volume    = {35},
-  pages     = {16509--16521},
-  year      = {2022}
-}
-
-@inproceedings{kuba2022trust,
-  title     = {Trust Region Policy Optimisation in Multi-Agent Reinforcement Learning},
-  author    = {Kuba, Jakub Grudzien and Chen, Ruiqing and Wen, Muning and Wen, Ying and Sun, Fanglei and Wang, Jun and Yang, Yaodong},
-  booktitle = {International Conference on Learning Representations (ICLR)},
-  year      = {2022}
 }

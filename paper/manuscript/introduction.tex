@@ -1,0 +1,105 @@
+\section{Introduction}
+\label{sec:introduction}
+
+%% Introduction, finalized 2026-09-13 after a full line-by-line editing pass
+%% with the user. MOVES 1-3 are reproduced here too (previously pulled from
+%% BReRLA_manuscript.tex 699-708) so the whole section lives in one file;
+%% assemble.py's carry-over of those lines is now redundant but harmless.
+
+The weapon-target assignment problem (WTA), first formalized by Manne in
+1958~\cite{manne1958target}, remains an active research problem
+today~\cite{ahuja2007exact} because of its continued relevance to modern
+defense scenarios. WTA and its variants allocate weapons to targets to
+minimize the targets' remaining values after engagement, and the problem is
+known to be NP-hard even in its original static, single-stage
+form~\cite{lloyd1986weapons}.
+
+The dynamic variant studied here (DWTA) adds four features that make the
+model more operationally realistic: (1) multiple engagement stages, (2)
+weapon reload times, (3) ammunition limits, and (4) windows during which a
+target can be engaged. Given the urgent and time-critical nature of
+battlefield situations, the solution method itself must also be fast.
+
+Existing methods are slow in different ways. Exact methods guarantee
+optimality but are limited to small instances, making them impractical for
+repeated use at every stage for realistically sized
+problems~\cite{ahuja2007exact,kline2019weapon}. Heuristics are fast, but each
+is typically designed around a specific set of constraints and does not
+readily transfer to other settings~\cite{kolitz1988analysis,lee2003genetic}.
+Learning-based approaches have been proposed to close this gap, but most
+remain narrower in scope. Prior reinforcement learning methods target the
+static problem, fix their network size to a particular instance size, or,
+when they do scale, assign weapons one at a time, causing computational cost
+to grow with the number of
+weapons~\cite{na2023weapon,gaudet2023,wu2022dynamic,yoontransformer}.
+
+Unlike single-stage (static) WTA, a DWTA engagement requires each weapon to
+make two distinct decisions. First, it must decide whether to fire or reserve
+its ammunition for a future engagement. This is a strategic participation
+decision. Second, if it fires, it must decide which target to engage. Prior
+learned approaches typically ask a single policy to make both decisions,
+producing either a target assignment or a decision to skip firing for each
+weapon within a stage~\cite{na2023weapon,gaudet2023,yoontransformer}. This is
+consistent with the standard design in neural combinatorial
+optimization~\cite{kool2018attention,kwon2020pomo}, but it requires the
+policy to learn two heterogeneous decisions, which makes the learning 
+more difficult. The two decisions are fundamentally different. Target
+assignment can be determined from information already known at the current
+stage, such as remaining target values, kill probabilities, and current
+engagement legality. In contrast, whether to fire depends on the consequences
+of preserving ammunition for future stages, which have not yet occurred.
+Treating both decisions as a single learning problem obscures this
+distinction, and we show that it comes at a measurable cost.
+
+Our claim is that only one of these two decisions needs to be learned. Once
+the set of firing weapons is known, their assignment to targets can be solved
+directly: a simple greedy rule on marginal value, requiring no training or
+learned parameters, provably achieves at least half of the best possible assignment
+value (Proposition~\ref{prop:auction-half}). Deciding which weapons should
+fire admits no equivalent shortcut. Holding fire provides no benefit within
+the current stage and pays off only through future engagements, so any rule
+based solely on the current stage can be arbitrarily poor. We show that such
+a rule can destroy substantially less target value than an optimal policy
+would (Proposition~\ref{prop:myopic-gap}). Thus, we train the model whether to fire or hold and, argue that this minimal learning can achieve reasonably good solutions.
+
+We build this idea into a simple system. A graph neural network considers all
+weapons and targets jointly and outputs one number per weapon: the
+probability that it should fire in the current stage. All weapons are
+decided in a single pass rather than one at a time. A greedy marginal-value rule then
+assigns the firing weapons to targets, and a lightweight search revisits the
+completed schedule by flipping individual fire-or-hold decisions and
+retaining only changes that improve the result. Trained on small instances
+(5 to 7 weapons, targets, and stages), the policy generalizes without
+further training to problems up to ten times larger, reaching 70 weapons,
+100 targets, and 15 stages.
+
+The main contributions of this study are summarized as follows:
+
+\begin{itemize}
+\item \textbf{A decomposition with a reason for every part}: We split the
+per-stage decision in two. Target assignment is decided by a greedy marginal-value rule with
+a provable $\tfrac12$ approximation guarantee (Proposition~\ref{prop:auction-half}). It holds even when weapons decide independently and simultaneously
+(Remark~\ref{rem:auction-kills-pileon}). Only the fire and hold (participation decision) is learned for each weapon within the stage (Proposition~\ref{prop:myopic-gap}).
+
+\item \textbf{Learning strictly less, and outperforms baselines}: The
+policy outputs one Bernoulli parameter per weapon per stage, not a target
+distribution. This reduces the mean objective by 14.9\% across twelve
+configurations and outperforms every richer alternative we trained.
+
+\item \textbf{A provably safe improvement step}: At inference we flip individual fire-or-hold decisions and keep only those the re-simulated objective confirms. This reduces the mean objective from 0.1219 to 0.1179 at a budget of ten re-simulations and to 0.1155 at thirty, uses no learned parameters, and cannot make a schedule worse at any budget (Proposition~\ref{prop:search-monotone}).
+
+\item \textbf{Simultaneous decisions with no coordination machinery}: All
+weapons are decided in a single pass. The assignment guarantee holds for any
+firing set, including one produced by weapons deciding independently
+(Remark~\ref{rem:auction-kills-pileon}), so the contention that communication
+layers and conflict handlers exist to resolve never arises. Adding
+weapon-to-weapon attention under an identical recipe makes the pipeline
+slightly worse and three times less stable across seeds
+(Section~\ref{sec:ablation}).
+
+\item \textbf{Rigorous, standardized benchmarking}: Evaluation spans four
+size tiers up to $70\times100\times15$ under resource scarcity, against exact solution approach,
+a greedy heuristic, the auction alone, a sequential decoder, and other RL approaches such as AM and POMO
+baselines~\cite{kool2018attention,kwon2020pomo}, all under an identical
+protocol.
+\end{itemize}

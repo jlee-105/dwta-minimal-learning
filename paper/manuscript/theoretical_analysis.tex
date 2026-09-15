@@ -1,0 +1,189 @@
+\section{Theoretical Analysis}
+\label{sec:submodular}
+
+This section establishes the two facts the decomposition rests on. Once the
+firing weapons are fixed, assigning targets among them greedily by marginal
+value attains at least half the stage optimum with no learned parameters
+(Proposition~\ref{prop:auction-half}), and the guarantee holds for any firing
+set, including one produced by all weapons deciding at the same instant. The
+other half of the decision admits no such treatment: choosing which weapons
+fire by what is best in the current stage can be arbitrarily far from optimal
+(Proposition~\ref{prop:myopic-gap}). That gap is the entire job of the learned
+policy.
+
+Throughout we reuse the stage objective $f_t$ of Eq.~\eqref{eq:round-obj},
+the firing set $F$, and the edge set $E_t$ introduced in
+Section~\ref{sec:auction}, where $f_t$ was shown to be monotone
+submodular~\cite{wang2013weapon} under a partition matroid induced by
+Eq.~\eqref{eq:weapon_target_constraint}. Write
+$\text{OPT}_t(F) = \max_{S_t \text{ feasible}} f_t(S_t)$ and
+$\text{OPT}_t = \text{OPT}_t(\{1,\ldots,M\})$.
+
+\subsection{Target Assignment Is Solved, Not Approximated}
+
+%% ============================================================
+%% COMMENTED OUT 2026-09-14: Propositions par-linear and seq-half.
+%%
+%% These two set up the standard case that simultaneous multi-agent decoding
+%% needs a coordination mechanism, so that the assignment guarantee could then
+%% be shown to remove the need for one. That argument turned out to be longer
+%% than it needs to be: prop:auction-half holds for ANY firing set, which
+%% already says the guarantee does not care whether the set was produced all
+%% at once, and the comparison against sequential decoding is carried
+%% empirically by Table~\ref{tab:main_results}.
+%%
+%% Restore if a reviewer asks why simultaneous decoding is safe in the
+%% worst case rather than only on the benchmark. related_works.tex also
+%% cited this pair; that sentence was rewritten when these were cut.
+%% ============================================================
+%% \begin{proposition}[Parallel decoding without an assignment mechanism: tight $\Theta(1/M)$]
+%% \label{prop:par-linear}
+%% Consider the idealized zero-communication parallel rule in which each weapon
+%% $m$ simultaneously selects its own feasible pair of largest singleton value
+%% $f_t(\{(m,n)\})$, with no visibility into the other weapons' same-stage
+%% choices. Then $f_t(\mathrm{Par}_t) \geq \tfrac{1}{M}\text{OPT}_t$, and this
+%% is tight.
+%% \end{proposition}
+%% \begin{proof}
+%% \emph{Lower bound.} Let $e^\ast = \arg\max_{e\in E_t} f_t(\{e\})$. By
+%% monotonicity and submodularity $f_t$ is subadditive, so for the optimal
+%% feasible $S^\ast_t$ (with $|S^\ast_t|\leq M$),
+%% $\text{OPT}_t \leq \sum_{e\in S^\ast_t} f_t(\{e\}) \leq M f_t(\{e^\ast\})$.
+%% The weapon owning $e^\ast$ selects it, since $e^\ast$ is globally best and
+%% hence best within its own part, so $f_t(\mathrm{Par}_t) \geq f_t(\{e^\ast\})
+%% \geq \text{OPT}_t/M$.
+%%
+%% \emph{Tightness.} Take $M$ weapons and $M{+}1$ targets: a shared target $n_0$
+%% of value $1$ and one private target per weapon of value $1-\varepsilon$, all
+%% with $P\equiv 1$ and all pairs feasible. Every weapon's best singleton is
+%% $n_0$, so $\mathrm{Par}_t$ sends all $M$ weapons to $n_0$, giving
+%% $f_t(\mathrm{Par}_t)=1$, while assigning one weapon to $n_0$ and the rest to
+%% their private targets gives $\text{OPT}_t = 1+(M{-}1)(1{-}\varepsilon)$. The
+%% ratio tends to $1/M$ as $\varepsilon\to 0$.
+%% \end{proof}
+%%
+%% \begin{proposition}[Sequential decoding carries a constant-factor guarantee]
+%% \label{prop:seq-half}
+%% An idealized sequential rule, in which each weapon in turn selects the
+%% feasible pair of largest marginal gain given all pairs already selected this
+%% stage, is the greedy algorithm for monotone submodular maximization under a
+%% matroid constraint, and therefore guarantees
+%% $f_t(\mathrm{Seq}_t) \geq \tfrac12\text{OPT}_t$~\cite{fisher1978analysis}.
+%% \end{proposition}
+%%
+%% Propositions~\ref{prop:par-linear} and~\ref{prop:seq-half} are the standard
+%% argument for why simultaneous multi-agent decoding needs a coordination
+%% mechanism, and they are why the multi-agent reinforcement learning
+%% literature has largely moved to sequential, auto-regressive action
+%% generation: the multi-agent advantage decomposition
+%% theorem~\cite{kuba2022trust} transforms the joint policy search into exactly
+%% the sequential decision process of Proposition~\ref{prop:seq-half}, and it is
+%% that sequencing which buys the monotonic improvement guarantees of
+%% HATRPO/HAPPO~\cite{kuba2022trust} and MAT~\cite{wen2022mat}.
+%%
+
+Our pipeline does not coordinate the weapons' target choices better. It
+removes the choice from them.
+
+\begin{proposition}[Many-to-one marginal assignment is matroid greedy on the stage objective]
+\label{prop:auction-half}
+Fix stage $t$ and a firing set $F$, and let $\text{OPT}_t(F)$ be the maximum of $f_t$ over feasible allocations of the weapons in $F$. The many-to-one greedy assignment returns an allocation $S^{\text{gre}}_t$ with
+\begin{equation}
+f_t(S^{\text{auc}}_t) \;\geq\; \tfrac12\,\text{OPT}_t(F).
+\end{equation}
+\end{proposition}
+\begin{proof}
+First, the assignment score equals the exact marginal gain of $f_t$. Let $S$ be the allocation so far and $S_{n'}$ the weapons already assigned to target $n'$. Adding $(m',n')$ changes only the $n'$ summand of Eq.~\eqref{eq:round-obj}:
+\begin{align*}
+f_t(S \cup \{(m',n')\}) - f_t(S)
+&= V_{n'}\rho_{n'}^{(t)}\Big[\textstyle\prod_{m \in S_{n'}}(1-P_{m,n'}) \\
+&\qquad\qquad - \textstyle\prod_{m \in S_{n'} \cup \{m'\}}(1-P_{m,n'})\Big] \\
+&= V_{n'}\rho_{n'}^{(t)} \Big(\textstyle\prod_{m \in S_{n'}}(1-P_{m,n'})\Big)\big[1-(1-P_{m',n'})\big] \\
+&= V_{n'}\rho_{n'}^{(t)}\,\sigma_{n'}\,P_{m',n'} \;=\; b_{m',n'},
+\end{align*}
+which is the quantity of Eq.~\eqref{eq:marginal-bid}. Second, the rule is greedy in that quantity: each iteration takes the single largest score over all unassigned weapons and legal targets, and never revokes an assignment. It is therefore the greedy algorithm for maximizing the monotone submodular $f_t$ under the partition matroid constraint, which attains at least $\tfrac12$ of the constrained optimum~\cite{fisher1978analysis}.
+\end{proof}
+
+The factor $\tfrac12$ is a worst-case floor that holds regardless of the scale of the problem: it does not degrade as the number of weapons $M$ grows. It is also close to the best attainable, since no polynomial-time method can guarantee more than $1-1/e$ for this problem class~\cite{feige1998threshold}, and the alternatives analyzed in Section~\ref{sec:submodular} carry either no guarantee or one that decays as $1/M$. The floor is also loose in practice. On the $(5,5,5)$ and $(5,7,5)$ benchmark configurations, where $\text{OPT}_t(F)$ can be computed exactly by enumerating every feasible allocation of the firing weapons, the rule attains a mean 99.3\% of the stage optimum over 77 policy-generated stages (ten instances per configuration, distribution of Section~\ref{sec:data}) and never falls below 87.1\%. The $\tfrac12$ bound is thus a guarantee against adversarial instances, not a description of typical behavior.
+%% Measured 2026-08-24 by code_DWTA/eval_auction_stage_ratio.py (result/auction_stage_ratio.txt):
+%% (5,5,5) mean 0.9939 min 0.8711 over 38 stages; (5,7,5) 0.9918/0.8782 over 39; combined 77 stages
+%% mean 0.9928 min 0.8711. A third probe config (5,15,5) gave 0.9973/0.9496 (43 stages) -- not reported
+%% in prose per author decision (non-benchmark config). Ratio = f_t(auction)/OPT_t(F) with F fixed to
+%% the trained SCoPE-Comm policy's firing set, OPT by exhaustive enumeration. Stages with empty F or
+%% no legal target excluded.
+
+What matters for the rest of the argument is the quantifier in
+Proposition~\ref{prop:auction-half}, not the constant.
+
+\begin{remark}
+\label{rem:auction-kills-pileon}
+Proposition~\ref{prop:auction-half} holds for \emph{any} firing set, in
+particular one produced by $M$ weapons deciding simultaneously and
+independently. Weapons deciding at the same instant would normally contend
+for the same target, and a communication layer or conflict handler exists to
+settle that contention. Here there is nothing to settle: no weapon chooses a
+target, so the choices that would collide are never made. The guarantee is
+obtained at one network call per stage rather than $M$.
+\end{remark}
+
+\subsection{Participation Cannot Be Decided Per Stage}
+
+Proposition~\ref{prop:auction-half} is conditional on $F$. It says nothing
+about how $F$ should be chosen, and the natural per-stage answer is to fire
+every weapon whose best available marginal value is positive. That answer is
+unboundedly bad.
+
+\begin{proposition}[Myopic participation is arbitrarily suboptimal]
+\label{prop:myopic-gap}
+Let $\textsc{Myopic}$ be the rule that, at every stage, fires every weapon
+with at least one legal target of positive marginal value, and assigns
+targets by greedy marginal assignment. For every $\kappa > 0$ there is a DWTA instance on
+which the value destroyed by $\textsc{Myopic}$ is less than $\kappa$ times
+the value destroyed by an optimal policy. No constant-factor guarantee for
+$\textsc{Myopic}$ exists.
+\end{proposition}
+\begin{proof}
+Take $T=2$, $M=1$, $N=2$. The single weapon has ammunition $A_1 = 1$, with
+$P_{1,1}=P_{1,2}=p \in (0,1]$. Target 1
+has value $V_1 = 1$ and time window $TW_1 = \{1\}$; target 2 has value
+$V_2 = V > 0$ and time window $TW_2 = \{2\}$.
+
+At stage 1 the only legal engagement is target 1, whose marginal value
+$V_1 p = p$ is positive, so $\textsc{Myopic}$ fires and exhausts the
+weapon's ammunition. At stage 2 target 2 is legal but the weapon has no
+ammunition, so nothing is engaged. $\textsc{Myopic}$ destroys $p$.
+
+The policy that holds at stage 1 and fires at target 2 at stage 2 is
+feasible and destroys $pV$. Hence the optimum destroys at least $pV$, and
+the ratio is at most $p/(pV) = 1/V$. Choosing $V > 1/\kappa$ gives the
+claim.
+\end{proof}
+
+\begin{remark}
+\label{rem:myopic-is-the-job}
+The instance in Proposition~\ref{prop:myopic-gap} isolates the one quantity
+no within-stage mechanism can access: the value of \emph{not} acting, which
+is zero within the stage and realized only later. Both the assignment
+guarantee (Proposition~\ref{prop:auction-half}) is per-stage, and so says
+nothing about it. This is the precise sense in which the
+decomposition of Section~\ref{sec:method} assigns learning only the part
+that cannot be obtained otherwise. It is also directly measurable: the
+Greedy baseline of Table~\ref{tab:main_results} is $\textsc{Myopic}$: it uses
+the same assignment rule as our pipeline and fires every weapon it can, so
+the margin between it and the learned pipeline is an empirical estimate of
+how much this gap costs on realistic instances rather than adversarial ones.
+\end{remark}
+
+\begin{remark}
+\label{rem:gap-interpretation}
+Proposition~\ref{prop:auction-half} concerns an idealized rule, not a
+trained network, and bounds a single stage rather than a full $T$-stage
+trajectory. Value missed at one stage is not necessarily
+lost: it remains on the battlefield, is re-observed through the updated
+$\rho_n^{(t+1)}$, and can be recovered later, which is one reason measured
+gaps are far smaller than the worst cases above. Proposition~\ref{prop:myopic-gap}
+is the exception, and deliberately so: its construction uses a closing time
+window precisely so that the missed value cannot be recovered, which is what
+makes the participation decision genuinely multi-stage rather than merely
+harder-to-see.
+\end{remark}

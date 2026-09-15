@@ -10,3 +10,20 @@ venv/
 *.bbl
 *.xdv
 *.out
+
+# Superseded code and abandoned experiments: kept on disk, not published
+code_DWTA/archive/
+
+# Model checkpoints and bulk experiment output
+*.pt
+*.pth
+code_DWTA/result/GNN_TRAIN_*/
+code_DWTA/result/*.csv
+
+# LaTeX build products
+*.pdf
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+
+paper/archive/

@@ -1,0 +1,664 @@
+\section{Experimental Results}
+\label{sec:results}
+
+\subsection{Experimental Setup}
+\label{sec:data}
+
+All experiments are conducted on a machine equipped with an NVIDIA GeForce RTX 5080 GPU (16\,GB) and an AMD Ryzen 9 9900X 12-core CPU (32\,GB), running Windows 11. The model is implemented in Python 3.12 with PyTorch and CUDA 12.8. Training requires approximately two hours per seed over 400 training steps.
+
+Training instances are generated following the parameter distribution shown in Table~\ref{tab:parameter_distributions}. The policy is trained on instances with $M, N, T \in [5,7]$, drawn at random each episode from this distribution.
+
+Instances are partitioned into three disjoint sets: a training set (generated online from the same distribution at each episode), a validation set (separate instances of the same size range, evaluated every ten epochs under greedy decoding for model selection), and a test set of ten independent benchmark replications per configuration (120 instances total). The twelve test configurations, ranging from $(5,5,5)$ to $(70,100,15)$ and shown in Table~\ref{tab:problem_instance_scales}, span four size tiers (Small, Medium, Large, Battlefield) and are never seen during training. Configurations are restricted to $N \geq M$ (targets at least as numerous as weapons), reflecting resource-constrained defense scenarios.
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Instance parameter distribution. $\mathcal{Z}(a,b)$ denotes discrete uniform on $\{a, \ldots, b\}$. $D_m$ is the number of stages before a weapon can fire again; $D_m=1$ permits every-stage firing.}
+\label{tab:parameter_distributions}
+\begin{tabular}{l|l}
+\hline
+\textbf{Attribute} & \textbf{Distribution} \\ \hline
+Target Value $V_n$ & $U(1, 10)$ \\
+Reload Time $D_m$ & $\mathcal{Z}(1, 2)$ \\
+Ammunition $A_m$ & $\mathcal{Z}(1, \lfloor T/2\rfloor{+}1)$ \\
+Start Time $t_{n,\text{start}}$ & $\mathcal{Z}(0, T{-}1)$ \\
+End Time $t_{n,\text{end}}$ & $T{-}1$ \\
+Damage Rate $P$ & $U(0.3, 0.9)$ \\ \hline
+\end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Test problem configurations. Each configuration uses ten fixed, seed-controlled instances identical across all methods.}
+\label{tab:problem_instance_scales}
+\begin{tabular}{c|c|c}
+\hline
+\textbf{Tier} & \textbf{(M,N,T)} & \textbf{Instances} \\ \hline
+\multirow{3}{*}{Small}      & (5,5,5)    & 10 \\
+                            & (5,7,5)    & 10 \\
+                            & (10,15,5)  & 10 \\ \hline
+\multirow{3}{*}{Medium}     & (15,15,5)  & 10 \\
+                            & (15,20,5)  & 10 \\
+                            & (20,30,5)  & 10 \\ \hline
+\multirow{3}{*}{Large}      & (30,30,10) & 10 \\
+                            & (30,40,10) & 10 \\
+                            & (40,50,10) & 10 \\ \hline
+\multirow{3}{*}{Battlefield} & (50,50,15) & 10 \\
+                            & (50,70,15) & 10 \\
+                            & (70,100,15) & 10 \\ \hline
+\end{tabular}
+\end{table}
+
+%% RESOLVED 2026-08-23: Table~\ref{tab:problem_instance_scales} now states 10 instances/config,
+%% matching what every reported run actually used (seed-controlled, fixed across methods).
+%% 2026-09-14: distribution table now matches generate_moderate_temporal_instance
+%% (V = U(2,6) + U(2,5)*t_start/(T-1), ammo Z(1,floor(T/2)+1), P ~ U(0.3,0.9)).
+%% Reload is reported as the firing cadence D_m = prep + 1, so code prep in {0,1}
+%% is tabulated as Z(1,2); see DWTA_Simulator.py:317.
+
+
+Model and training hyperparameters follow standard practice in GNN-based
+combinatorial optimization, detailed in Table~\ref{tab:hyperparameters}. No
+systematic tuning was performed except on the search budget $K$
+(Section~\ref{sec:budget}), whose impact is studied directly. Other configurations may yield better results.
+
+\begin{table}[h]
+\centering
+\small
+\caption{Selected model and training hyperparameters.}
+\label{tab:hyperparameters}
+\begin{tabular}{ll}
+\hline
+\textbf{Parameter} & \textbf{Value} \\ \hline
+Message-passing layers $L$ & 3 \\
+Hidden/embedding dimension $H$ & 128 \\
+Attention heads (ablation only, Eq.~\eqref{eq:comm-attn}) & 8 \\
+Dropout (residual blocks) & 0.1 \\
+Optimizer & Adam \\
+Learning rate & $5 \times 10^{-4}$ (cosine decay to $1\%$) \\
+Weight decay & $1 \times 10^{-2}$ \\
+Gradient-norm clip & 1.0 \\
+Instances per training step & 15 \\
+Parallel rollouts per instance $P$ & 10 \\
+Ammunition bonus $\lambda_{\text{ammo}}$ (Eq.~\eqref{eq:return}) & 0.1 \\
+Search budget in training $K_{\text{train}}$ & 3 \\
+Search budget at evaluation $K$ & 10 (Table~\ref{tab:budget}) \\ \hline
+\end{tabular}
+\end{table}
+
+%% Values above verified against common/Dynamic_HYPER_PARAMETER.py and common/DWTA_GNN_comm_sinkhorn.py
+%% on 2026-08-23 (EMBEDDING_DIM=128, HEAD_NUM=8, ACTOR_LEARNING_RATE=5e-4, ACTOR_WEIGHT_DECAY=1e-2,
+%% ResidualBlock/MultiheadAttention dropout=0.1, Adam). Training-loop values re-verified
+%% 2026-09-12 against rl/DWTA_GNN_TRAIN_search_in_loop.py (k_edits=3, k_eval=10, batch 15,
+%% para 10, ammo_coef=0.1).
+%%
+%% RESOLVED 2026-08-23: sinkhorn_scale ablation run (eval_sinkhorn_ablation.py, result/sinkhorn_ablation.txt):
+%% scale as trained (0.0213) vs forced to 0, all 12 configs, same instances -- mean 0.1528 vs 0.1527,
+%% per-config deltas within +-0.0024 (both signs, noise). Term is INACTIVE; disclosed in one sentence
+%% at the end of Section~\ref{sec:comm}.
+
+
+\subsubsection{Baseline Methods}
+
+We compare against three families of baselines: an exact solver, two
+non-learned heuristics, and three learned construction policies.
+
+\paragraph{Exact} The DWTA formulation of Section~\ref{sec:problem} is a
+mixed-integer nonlinear program, which we solve with
+SCIP~\cite{bestuzheva2023scip} under a 600\,s time limit per instance. When
+optimality is not proven within that budget, SCIP reports its best incumbent.
+
+\paragraph{Heuristics} \textsc{Greedy} assigns, at every stage, the
+weapon-target pair with the largest immediate marginal destroyed value,
+updates that target's remaining value, and repeats until no legal pair
+remains. This is the assignment rule of Section~\ref{sec:auction} applied to
+every weapon that can fire, which makes it exactly the $\textsc{Myopic}$ rule
+of Proposition~\ref{prop:myopic-gap}. It is the baseline that isolates what
+the learned fire-or-hold decision contributes: it and our method assign
+targets identically and differ only in which weapons fire.
+\textsc{Auction} instead matches weapons to targets by the price mechanism of
+Bertsekas~\cite{bertsekas1988auction}. Targets carry prices that rise as
+weapons bid on them, an incumbent is displaced when outbid, and a weapon
+holds fire when no target's remaining value exceeds its price. Prices admit
+one weapon per target, so this baseline cannot concentrate several weapons on
+a single target.
+
+\paragraph{Learned construction policies} All three build a schedule
+autoregressively, one decision at a time, re-observing the state after each.
+They differ in how a decision is parameterized and in what the encoder sees.
+
+\textsc{Sequential} decodes one assignment at a time. At
+every step it forms a single softmax over all $M \times N$ weapon-target edges
+plus one global no-op, samples one edge, applies it, and re-runs the full
+edge-aware GNN encoder on the updated state. It therefore chooses \emph{which
+weapon acts} and \emph{which target it engages} jointly at each step, and the
+kill probability $P_{mn}$ enters the encoder directly as an edge feature.
+
+AM~\cite{kool2018attention} is the attention model of Kool et al., run
+unmodified through RL4CO~\cite{berto2023rl4co}. Its encoder is a Transformer
+over target nodes, evaluated once per instance; the decoder then attends to
+those fixed embeddings through a context query. Because target values change
+as damage accumulates, the static-embedding default is unsound here, so
+remaining value is supplied to the decoder as an explicit dynamic embedding.
+The decision order is fixed in advance, round-major and weapon-minor, so the
+step index prescribes which weapon acts and the pointer selects only its
+target or a no-op.
+
+POMO~\cite{kwon2020pomo} shares AM's architecture and differs in its rollout
+scheme: several trajectories are drawn per instance from forced-distinct
+starting actions, and their mean serves as the REINFORCE baseline. We report
+POMO under single-path greedy decoding rather than best-of-multistart, so that
+its inference budget matches every other method in the table.
+
+All three learned baselines are trained on the same curriculum under the same
+optimizer settings, and all neural methods are evaluated zero-shot at every
+tier with no fine-tuning on the test configurations.
+
+\subsection{Main Results}
+\label{sec:main-results}
+
+Methods are compared on the normalized remaining value, the fraction of the
+initial target value still standing when the engagement ends, for which lower
+is better.
+%% Generated by code_DWTA/eval_final_table.py from the three fire/hold-only
+%% checkpoints (seeds 5, 6, 7), result/final_table_nocomm.txt. (NOT
+%% final_table_multiseed.txt, which is the older with-communication run and
+%% has mean 0.1197 at K=10 rather than the reported 0.1179.)
+%% Baseline columns are carried over from the previous benchmark run: verified
+%% comparable because both use the same generator, seed 123, and the same ten
+%% instances per configuration -- the Sequential mean reproduces to 0.1432 in
+%% both, to four decimals.
+
+\begin{table*}[t]
+\centering
+\scriptsize
+\caption{Main results across twelve held-out test configurations.
+Normalized remaining value (lower is better). Our column reports the mean over three seeds followed by the across-seed standard deviation. Every method constructs its schedule in a single pass, so the comparison is at matched inference effort; what the local search adds on top is reported separately in Section~\ref{sec:budget}. SCIP uses a 600\,s limit and reports its incumbent; at the two largest configurations it fails to find a competitive solution. Bold marks the best method per configuration.}
+\label{tab:main_results}
+\begin{tabular}{@{}llcccccccc@{}}
+\toprule
+Tier & Config & SCIP & Greedy & Auction & AM & POMO & Sequential & Ours \\
+\midrule
+\multirow{3}{*}{Small}
+ & (5,5,5)     & \textbf{0.148} & 0.598 & 0.362 & 0.249 & 0.243 & 0.169 & 0.190 $\pm$ .000 \\
+ & (5,7,5)     & \textbf{0.199} & 0.623 & 0.455 & 0.446 & 0.447 & 0.307 & 0.245 $\pm$ .000 \\
+ & (10,15,5)   & \textbf{0.192} & 0.619 & 0.418 & 0.446 & 0.488 & 0.300 & 0.225 $\pm$ .001 \\
+\midrule
+\multirow{3}{*}{Medium}
+ & (15,15,5)   & \textbf{0.087} & 0.533 & 0.266 & 0.288 & 0.315 & 0.096 & 0.094 $\pm$ .000 \\
+ & (15,20,5)   & \textbf{0.138} & 0.616 & 0.363 & 0.480 & 0.508 & 0.207 & 0.166 $\pm$ .000 \\
+ & (20,30,5)   & \textbf{0.176} & 0.638 & 0.448 & 0.548 & 0.584 & 0.295 & 0.209 $\pm$ .000 \\
+\midrule
+\multirow{3}{*}{Large}
+ & (30,30,10)  & 0.015 & 0.355 & 0.078 & 0.164 & 0.093 & 0.016 & \textbf{0.012} $\pm$ .001 \\
+ & (30,40,10)  & 0.045 & 0.407 & 0.177 & 0.256 & 0.136 & \textbf{0.032} & 0.037 $\pm$ .002 \\
+ & (40,50,10)  & 0.051 & 0.331 & 0.150 & 0.261 & 0.144 & \textbf{0.028} & 0.028 $\pm$ .001 \\
+\midrule
+\multirow{3}{*}{Battlefield}
+ & (50,50,15)  & 0.157 & 0.361 & 0.156 & 0.195 & \textbf{0.077} & 0.088 & 0.084 $\pm$ .002 \\
+ & (50,70,15)  & 0.992 & 0.390 & 0.171 & 0.268 & 0.099 & 0.080 & \textbf{0.077} $\pm$ .002 \\
+ & (70,100,15) & 0.993 & 0.403 & 0.177 & 0.306 & 0.106 & 0.100 & \textbf{0.096} $\pm$ .001 \\
+\midrule
+ & \textbf{Mean} & 0.266 & 0.490 & 0.268 & 0.326 & 0.270 & 0.143 & \textbf{0.122} \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+At matched inference effort, the mean objective across the twelve
+configurations is 0.122, against 0.143 for the strongest neural baseline
+(Sequential), a 14.9\% relative reduction. Every non-exact baseline is beaten
+on the mean.
+
+The per-configuration picture is more informative than the mean, and splits
+cleanly by tier. Against SCIP, we lose all six Small and Medium
+configurations and win all six Large and Battlefield ones. That is the
+expected pattern: at small scale the solver still proves or nearly proves
+optimality within its budget, and no heuristic should beat it there; at large
+scale its branch-and-bound no longer reaches a competitive incumbent, failing
+outright at the two largest configurations. Against Sequential, the
+strongest learned baseline, we win 9 of 12 and tie at (40,50,10),
+losing only (5,5,5) by 0.021 and (30,40,10) by 0.005. Against all learned
+baselines together we are best at 8 of 12; the remaining loss is (50,50,15),
+where POMO reaches 0.077 against our 0.084.
+
+All results are reported over three seeds. Across-seed standard deviations
+are between 0.000 and 0.002, smaller than the gap to the nearest competing
+method at every configuration, so the ordering of methods does not depend on
+which training run is used.
+
+%% Measured by code_DWTA/measure_method_timing.py (Greedy, Auction, Sequential,
+%% ours) and code_DWTA/measure_rl4co_timing.py (AM, POMO), both on the same ten
+%% seed-123 instances per configuration. CUDA-synchronized, warm-up passes
+%% discarded, one instance at a time: RL4CO would batch all ten into a single
+%% forward, which would credit AM and POMO with parallelism no other method is
+%% given. Raw output in result/timing_methods.txt and result/timing_rl4co.txt.
+
+\begin{table}[t]
+\centering
+\small
+\caption{Mean wall-clock time per instance in seconds, averaged over the three
+configurations in each tier. All methods decode one instance at a time on the
+same hardware. SCIP is omitted: it is given a fixed 600\,s budget per instance
+rather than running to completion, so its time is a setting, not a
+measurement.}
+\label{tab:timing}
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+Tier & Greedy & Auction & AM & POMO & Sequential & Ours \\
+\midrule
+Small       & \textbf{0.029} & 0.113 & 0.075 & 0.093 & 0.055 & 0.032 \\
+Medium      & \textbf{0.053} & 0.159 & 0.153 & 0.153 & 0.122 & 0.063 \\
+Large       & \textbf{0.184} & 0.558 & 0.651 & 0.603 & 0.497 & 0.203 \\
+Battlefield & \textbf{0.527} & 1.562 & 1.618 & 1.604 & 1.315 & 0.577 \\
+\midrule
+\textbf{Mean} & \textbf{0.199} & 0.598 & 0.625 & 0.613 & 0.497 & 0.218 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Table~\ref{tab:timing} reports what each method costs to run. Our pipeline is
+the fastest of every method that learns anything, at 0.218\,s per instance
+against 0.497\,s for the sequential decoder and roughly 0.62\,s for AM and
+POMO, and the margin widens with scale: at the Battlefield tier it is 0.577\,s
+against 1.315\,s. The reason is structural. Construction calls the network
+once per stage and decides all $M$ weapons in that one call, whereas a
+sequential decoder calls it once per weapon per stage, so its cost grows with
+the size of the force while ours does not. Only \textsc{Greedy} is faster, at
+0.199\,s, and it has no network to run at all.
+
+Taken together with the objective, this is the result the paper rests on. The
+one method that beats us on time is the worst in the table on quality, at
+0.490 against our 0.122. The methods that come closest on quality are two to
+six times slower. Against \textsc{Sequential}, the strongest learned baseline,
+we are better on the objective at nine of twelve configurations and
+2.3 times faster on average, so the comparison does not trade one against the
+other.
+
+\subsection{Inference-Time Improvement}
+\label{sec:budget}
+
+Once a schedule has been constructed it can still be improved without
+touching the model. The search flips one fire-or-hold decision, re-simulates
+the episode under the same assignment rule, and keeps the change only if the
+objective improves, repeating this up to $K$ times
+(Section~\ref{sec:local-search}). Nothing is learned here: the budget $K$ buys
+computation at inference, not parameters.
+
+Because a flip is kept only on strict improvement, the objective is
+non-increasing in $K$, so the informative question is not whether the curve
+descends but where it stops. Table~\ref{tab:budget} reports the sweep and, for
+each configuration, the mean index of the last accepted flip within a $K{=}30$
+probe.
+
+\begin{table}[t]
+\centering
+\small
+\caption{Edit-budget sweep, mean over three seeds. \emph{last accept} is the
+mean index of the final accepted flip within a $K{=}30$ probe; a value near 30
+indicates the search was still finding improvements when the budget ran out.}
+\label{tab:budget}
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+Config & $K{=}0$ & $K{=}3$ & $K{=}10$ & $K{=}30$ & last accept \\
+\midrule
+(5,5,5)     & 0.1901 & 0.1825 & 0.1740 & 0.1660 & 11.5 \\
+(5,7,5)     & 0.2451 & 0.2381 & 0.2347 & 0.2341 & 7.0 \\
+(10,15,5)   & 0.2248 & 0.2240 & 0.2212 & 0.2167 & 13.3 \\
+(15,15,5)   & 0.0940 & 0.0925 & 0.0918 & 0.0905 & 12.9 \\
+(15,20,5)   & 0.1661 & 0.1647 & 0.1597 & 0.1550 & 19.8 \\
+(20,30,5)   & 0.2086 & 0.2070 & 0.2040 & 0.1985 & 17.7 \\
+(30,30,10)  & 0.0121 & 0.0118 & 0.0113 & 0.0105 & 21.3 \\
+(30,40,10)  & 0.0373 & 0.0366 & 0.0355 & 0.0336 & 21.8 \\
+(40,50,10)  & 0.0279 & 0.0275 & 0.0263 & 0.0248 & 19.4 \\
+(50,50,15)  & 0.0839 & 0.0838 & 0.0837 & 0.0837 & 21.2 \\
+(50,70,15)  & 0.0771 & 0.0770 & 0.0769 & 0.0767 & 20.6 \\
+(70,100,15) & 0.0960 & 0.0959 & 0.0958 & 0.0956 & 21.7 \\
+\midrule
+\textbf{Mean} & 0.1219 & 0.1201 & 0.1179 & \textbf{0.1155} & 17.4 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Two patterns matter. The gain is modest in absolute terms, 0.1219 to 0.1155,
+a 5.2\% relative reduction across the full budget, because the construction
+policy is now trained against the searched objective and therefore already
+produces schedules the search has little left to fix. That is the intended
+behaviour of training through the search, not a weakness of the search.
+
+Second, where the curve flattens scales with problem size. At (5,7,5) the last
+accepted flip is at index 7 on average, and the $K{=}10$ and $K{=}30$ columns
+differ by 0.001. At the Large and Battlefield configurations the last accepted
+flip sits around 20, so the search is still finding improvements when a budget
+of 30 expires. A larger schedule offers more slots worth editing, and
+because quality never falls as $K$ grows, an operator can
+spend accordingly: a tight decision cycle stops at $K{=}3$ and banks most of
+the gain, a loose one keeps going.
+
+%% ============================================================
+%% COMMENTED OUT 2026-09-14.
+%% This section compared two sources of the fire/hold decision: our parallel
+%% policy, and the Sequential decoder with its target choices discarded. That
+%% second arm is not a clean control. Sequential decides firing and targeting
+%% in one step, choosing an edge because a particular target is attractive, so
+%% stripping the target away removes the reason the weapon was selected at all.
+%% The honest version of this comparison would decide fire/hold weapon by
+%% weapon and then assign, against deciding all at once and then assigning,
+%% with the same policy in both arms; that needs a separately trained
+%% sequential participation policy, since ours is trained to see all weapons
+%% at once.
+%%
+%% It is also redundant. Proposition~\ref{prop:auction-half} holds for ANY
+%% firing set, so the guarantee does not care whether the set was produced
+%% simultaneously, and Table~\ref{tab:main_results} already shows the parallel
+%% pipeline beating the Sequential decoder outright. Restore only if a
+%% reviewer asks for the direct comparison AND the sequential participation
+%% policy is trained.
+%% ============================================================
+%% \subsection{Which Decision Needs Learning}
+%% \label{sec:firehold-source}
+%%
+%% Proposition~\ref{prop:auction-half} holds for any firing set, so the source of
+%% that set should matter less than its quality. We test this by fixing the
+%% pipeline, keeping the same assignment rule, revision, instances and budget, and
+%% changing only where the fire/hold decision comes from. The sequential arm runs
+%% the sequential decoder to completion on a copy of the live state and keeps only
+%% which weapons fired, discarding its target choices exactly as the parallel
+%% policy's are discarded.
+%%
+%% \begin{table}[t]
+%% \centering
+%% \small
+%% \caption{Source of the fire/hold decision, everything else fixed. Normalized
+%% remaining value, lower is better. \emph{Seq.\ alone} uses the sequential
+%% decoder's own target choices, with no assignment step and no revision.}
+%% \label{tab:firehold-source}
+%% \begin{tabular}{@{}lcccccc@{}}
+%% \toprule
+%% & & \multicolumn{2}{c}{parallel} & \multicolumn{2}{c}{sequential} \\
+%% \cmidrule(lr){3-4}\cmidrule(lr){5-6}
+%% Config & Seq.\ alone & $K{=}0$ & $K{=}10$ & $K{=}0$ & $K{=}10$ \\
+%% \midrule
+%% (5,5,5)     & 0.1694 & 0.2486 & 0.1794 & 0.1736 & 0.1605 \\
+%% (5,7,5)     & 0.3071 & 0.3213 & 0.2696 & 0.3093 & 0.2868 \\
+%% (10,15,5)   & 0.2996 & 0.2911 & 0.2640 & 0.3011 & 0.2891 \\
+%% (15,15,5)   & 0.0958 & 0.1215 & 0.1108 & 0.1003 & 0.0984 \\
+%% (15,20,5)   & 0.2073 & 0.2150 & 0.1831 & 0.2154 & 0.1950 \\
+%% (20,30,5)   & 0.2953 & 0.2599 & 0.2302 & 0.3076 & 0.2857 \\
+%% (30,30,10)  & 0.0162 & 0.0153 & 0.0122 & 0.0153 & 0.0134 \\
+%% (30,40,10)  & 0.0317 & 0.0361 & 0.0331 & 0.0344 & 0.0304 \\
+%% (40,50,10)  & 0.0283 & 0.0298 & 0.0287 & 0.0299 & 0.0267 \\
+%% (50,50,15)  & 0.0878 & 0.0972 & 0.0917 & 0.0852 & 0.0849 \\
+%% (50,70,15)  & 0.0798 & 0.0869 & 0.0811 & 0.0783 & 0.0778 \\
+%% (70,100,15) & 0.1003 & 0.1103 & 0.1063 & 0.0992 & 0.0988 \\
+%% \midrule
+%% \textbf{Mean} & 0.1432 & 0.1528 & \textbf{0.1325} & 0.1458 & 0.1373 \\
+%% \bottomrule
+%% \end{tabular}
+%% \end{table}
+%%
+%% Unrevised, the sequential source is better (0.1458 vs 0.1528), as
+%% Propositions~\ref{prop:par-linear} and~\ref{prop:seq-half} predict. The
+%% ordering reverses at $K{=}10$: 0.1325 against 0.1373. Both beat the sequential
+%% decoder using its own targets (0.1432), so delegating assignment costs nothing.
+%%
+%% The reversal is not evidence that simultaneous decisions are better; the
+%% $K{=}0$ columns say otherwise. It is that parallel-produced schedules are more
+%% improvable at equal budget. The sequential source still wins 7 of 12
+%% configurations, so the mean is carried by margin, not by uniform superiority, most visibly at (20,30,5), 0.2302 against 0.2857.
+%%
+%% One caveat weakens the sequential arm: the revision policy used here was
+%% trained on parallel-produced schedules, so the sequential arm is
+%% off-distribution. The parallel win is conservative; the sequential numbers are
+%% a lower bound.
+%%
+
+\subsection{Ablation Studies}
+\label{sec:ablation}
+
+Each of the following measures something the framework could have contained
+and does not. Multi-agent construction policies normally give agents a way to
+see one another before they commit, through a communication layer or a
+conflict handler, because agents deciding at the same instant will otherwise
+contend for the same resource. Ours has neither. The contended resource here
+is the target, no weapon in this pipeline chooses one, and the assignment step
+allocates targets after participation is already fixed, so there is nothing
+left for the weapons to coordinate over. The same question arises for the
+revision step, which could plausibly learn where to edit rather than propose
+uniformly at random. In each case we built the richer variant, trained it
+under an identical recipe, and kept the smaller one only where the measurement
+said the addition did not earn its place.
+
+
+\subsubsection{Weapon-to-Weapon Communication}
+\label{sec:comm-ablation}
+
+Remark~\ref{rem:auction-kills-pileon} predicts that inter-agent communication
+should buy nothing here, because the contention it exists to resolve is over
+targets and no weapon in this pipeline chooses one. We tested that prediction
+by adding one multi-head self-attention layer over the $M$ weapon embeddings,
+placed between the encoder and the scoring heads,
+\begin{equation}
+\label{eq:comm-attn}
+\bm{C} = \text{MHA}\!\left(\bm{H}^{\text{wpn}}, \bm{H}^{\text{wpn}}, \bm{H}^{\text{wpn}}\right), \qquad
+\bm{h}_m^{\text{wpn,comm}} = \text{Res}\!\left(\text{LN}\!\left(\bm{h}_m^{\text{wpn},(L)} + \bm{C}_m\right)\right),
+\end{equation}
+with $\bm{H}^{\text{wpn}} = [\bm{h}_1^{\text{wpn},(L)}; \ldots; \bm{h}_M^{\text{wpn},(L)}]$
+and $\text{MHA}$ standard self-attention~\cite{vaswani2017attention} over the
+weapon axis, and retraining from scratch under an identical recipe: same
+three seeds, same curriculum, same budgets, same evaluation protocol.
+
+\begin{table}[t]
+\centering
+\small
+\caption{With and without the weapon-to-weapon self-attention layer. Mean over
+three seeds with across-seed standard deviation, twelve held-out
+configurations.}
+\label{tab:comm-ablation}
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+& $K{=}0$ & $K{=}3$ & $K{=}10$ & $K{=}30$ \\
+\midrule
+with communication & 0.1242 & 0.1222 & 0.1197 & 0.1169 \\
+\textbf{without (reported)} & \textbf{0.1219} & \textbf{0.1201} & \textbf{0.1179} & \textbf{0.1155} \\
+\midrule
+max.\ across-seed std.\ ($K{=}10$) & \multicolumn{2}{l}{with: 0.0076} & \multicolumn{2}{l}{without: 0.0023} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Removing the layer is better at every budget, and the effect is consistent
+rather than an artifact of the mean: the no-communication variant is ahead at
+8 of 12 configurations and behind at none by more than 0.0015, which is inside
+the seed spread. The largest single gap is at (40,50,10), 0.0263 against
+0.0359. Across-seed variance also falls by a factor of three.
+
+We take this as confirmation of Remark~\ref{rem:auction-kills-pileon} rather
+than a surprise, and note what it does \emph{not} say. It is not evidence that
+communication mechanisms are unhelpful in multi-agent construction generally;
+it is evidence that in a pipeline where the contended resource is allocated by
+a separate mechanism, the coordination those layers provide is redundant. The
+prediction and the measurement agree, and the architecture we report is the
+smaller one.
+
+\subsubsection{Learned Selection in the Revision Step}
+\label{sec:learned-vs-random}
+
+An accept-if-improving rule makes any proposal distribution monotonically
+non-degrading (Section~\ref{sec:local-search}). Comparing a learned
+proposer against the unrevised base therefore establishes nothing. The
+comparison that does is against a random proposer at matched budget.
+
+\begin{table}[t]
+\centering
+\small
+\caption{Learned versus uniformly random slot selection at matched
+re-simulation budget, accumulate-and-keep-best operator. Random is averaged
+over five repeats.}
+\label{tab:learned-vs-random}
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+Config & $K{=}0$ & learned $K{=}3$ & random $K{=}3$ & learned $K{=}10$ & random $K{=}10$ \\
+\midrule
+(5,5,5)    & 0.2486 & 0.1929 & 0.2085 & 0.1794 & 0.1991 \\
+(5,7,5)    & 0.3213 & 0.2764 & 0.2874 & 0.2696 & 0.2773 \\
+(10,15,5)  & 0.2911 & 0.2686 & 0.2799 & 0.2640 & 0.2715 \\
+(15,15,5)  & 0.1215 & 0.1150 & 0.1169 & 0.1108 & 0.1146 \\
+\midrule
+\textbf{Mean} & 0.2456 & 0.2132 & 0.2232 & \textbf{0.2060} & 0.2156 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The learned selector wins at every configuration, so its contribution is real.
+It is also small: random recovers 0.0300 of the 0.0397 total gain. \textbf{76\%
+of the improvement comes from re-simulation and the accept rule, not from
+learning.}
+
+\subsubsection{The Revision Operator}
+\label{sec:operator}
+
+The operator used previously applies every proposed flip and protects only the
+reported value. That is a greedy walk, not a neighbourhood search, and
+it does not reach a 1-flip local optimum even when run to exhaustion. Accept-if-improving
+makes it one.
+
+\begin{table}[t]
+\centering
+\small
+\caption{Accumulate-and-keep-best versus hill climbing at $K{=}10$, matched
+budget.}
+\label{tab:operator}
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Config & $K{=}0$ & Accumulate & Hill climb & Hill climb \\
+       &         & (learned)  & (learned)  & (random)   \\
+\midrule
+(5,5,5)   & 0.2486 & 0.1794 & 0.1764 & 0.1622 \\
+(5,7,5)   & 0.3213 & 0.2696 & 0.2560 & 0.2323 \\
+(10,15,5) & 0.2911 & 0.2640 & 0.2396 & 0.2496 \\
+(15,15,5) & 0.1215 & 0.1108 & 0.1049 & 0.1038 \\
+\midrule
+\textbf{Mean} & 0.2456 & 0.2060 & 0.1942 & \textbf{0.1870} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Hill climbing wins at all four configurations and carries the guarantee
+accumulation lacks. It also inverts the previous result: under the corrected
+operator the learned ordering is \emph{worse} than random (0.1942 vs 0.1870).
+The accept test does the work the ordering was doing, and the selector is
+off-distribution besides. At this operator arity the learned selector does not
+earn its parameters, which is why the final framework has no second network.
+
+%% ============================================================
+%% COMMENTED OUT 2026-09-14. Superseded by the timing table in
+%% Section~\ref{sec:main-results}.
+%%
+%% Every quantitative claim below was measured before the assignment step was
+%% vectorized. It ran one weapon at a time inside a Python loop, costing
+%% O(M^2) small tensor calls per stage; forming the whole marginal matrix at
+%% once and updating only the column that changed gives identical actions
+%% (verified on 600 random cases) and is 31x faster at 70x100. That reversed
+%% the section's conclusion: the pipeline is no longer slower than a
+%% sequential pass, it is 2.3x faster on the mean, so the matched-wall-clock
+%% argument this section was built to make is no longer needed.
+%%
+%% Worth salvaging if the cost breakdown is ever wanted again: the split
+%% between construction and search, and the point that re-simulation restarts
+%% from stage 0 even though the stages before the edited slot are unchanged,
+%% which is still true and still an easy speedup.
+%% ============================================================
+%% \subsection{Inference Cost}
+%% \label{sec:efficiency}
+%% %% Measured by code_DWTA/measure_final_timing.py: CUDA-synchronized, two
+%% %% untimed warm-up instances per configuration drawn from a separate RNG
+%% %% stream, ten timed instances, single GPU.
+%%
+%% \begin{table}[t]
+%% \centering
+%% \small
+%% \caption{Mean per-instance wall-clock time in seconds, tier averages over three
+%% configurations each. \emph{Construction} is encode, fire/hold and assignment once
+%% per stage; \emph{search} is ten re-simulations; \emph{sequential} is the
+%% per-weapon decoding loop.}
+%% \label{tab:timing}
+%% \begin{tabular}{@{}lcccc c@{}}
+%% \toprule
+%% Tier & Construction & Search ($K{=}10$) & Total & Sequential & Seq./Constr. \\
+%% \midrule
+%% Small       & 0.052 & 0.315 & 0.367 & 0.124 & 2.4$\times$ \\
+%% Medium      & 0.104 & 0.858 & 0.962 & 0.356 & 3.4$\times$ \\
+%% Large       & 0.409 & 3.807 & 4.216 & 1.638 & 4.0$\times$ \\
+%% Battlefield & 1.213 & 12.492 & 13.704 & 4.972 & 4.1$\times$ \\
+%% \bottomrule
+%% \end{tabular}
+%% \end{table}
+%%
+%% Two readings of Table~\ref{tab:timing} matter, and the second corrects a claim
+%% it would be easy to make from the first.
+%%
+%% Construction alone is 2.4 to 4.1 times cheaper than sequential decoding, with
+%% the ratio widening as the force grows: construction makes one network call
+%% per stage, sequential decoding one per weapon per stage.
+%%
+%% But construction is not where the time goes. A single search re-simulation
+%% costs about as much as an entire construction pass (1.25\,s against 1.21\,s at
+%% the largest configuration), even though it invokes no network at all. The
+%% assignment step and the simulator, both loop-bound rather than vectorized, dominate
+%% everything; the encoder is close to free by comparison. Consequently a budget
+%% of $K{=}10$ makes the full pipeline 2.8 times \emph{slower} than a sequential
+%% pass, not faster. We state this plainly because the opposite is easy to assume
+%% from the decoding-complexity argument and is wrong.
+%%
+%% The useful comparison is therefore at matched wall clock rather than at
+%% matched edit budget. At the largest configuration a sequential pass costs
+%% 4.97\,s; construction plus three edits costs 4.96\,s. At that equal budget the
+%% objectives are 0.1432 and 0.1222, a 14.7\% relative reduction. This is what
+%% the cheap construction pass buys: not a faster answer, but room to search
+%% inside the time the alternative needs for a single pass.
+%%
+%% Both costs are implementation-bound rather than intrinsic. The assignment
+%% step is a per-batch Python loop and re-simulation restarts from stage~0 even though
+%% stages before the edited slot are unchanged; vectorizing the former and
+%% resuming the latter would each cut the dominant term substantially. Neither is
+%% done here, so the times above should be read as an upper bound on the cost of
+%% this design, not a property of it.
+%%
+
+\subsection{Limitations}
+\label{sec:limits}
+
+Results are reported over three seeds. Training is non-monotone in steps for every method
+we trained here, so checkpoints are selected by best held-out performance
+during training rather than final step. We report the full trace, but this
+remains a selection procedure. Selection used a cheaper criterion than the
+reported table; reported numbers are regenerated for every checkpoint on all
+twelve configurations under one protocol.
+
+The non-monotonicity is large enough to state concretely rather than in the
+abstract. On one seed the best checkpoint reached 0.1219 at step 260 while the
+final step returned 0.1493, and an intermediate evaluation at step 340
+degraded to 0.3540 before recovering. On another the best checkpoint was the
+final step itself, which suggests the runs are not uniformly converged and
+that a longer schedule might still improve them. Reporting the peak alone
+would hide all of this. Appendix~\ref{app:traces} therefore gives the complete
+evaluation trace for every seed, so that a reader can see what the selection
+procedure was choosing from.
+
+One fact tempers the concern. The three selected checkpoints agree closely on
+the held-out benchmark despite these divergent trajectories
+(Table~\ref{tab:main_results}), so the procedure is selecting reproducibly even
+though the path to it is erratic.
+
+We take the instability to be a property of the learning problem rather than
+of the implementation. Participation is a binary decision whose reward is
+structurally delayed: firing pays immediately, holding pays nothing within the
+stage and only later, if at all. Gradient information is correspondingly weak,
+since the decision is piecewise constant in the logit. Training through a
+fixed search adds a second effect in the same direction: because the search
+repairs some of the policy's mistakes before the objective is measured, the
+learning signal about those mistakes is attenuated. The search buys a better
+objective and a more stable optimization at the cost of a less discriminating
+gradient. We report this as a hypothesis consistent with the traces, not as a
+measured mechanism.

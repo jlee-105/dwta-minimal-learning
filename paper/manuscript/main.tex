@@ -1,0 +1,136 @@
+%% Computers & Operations Research (Elsevier) skeleton.
+%% Venue changed from Applied Intelligence 2026-09-11; see the v2 drafts for the
+%% section bodies that go here. NOT YET COMPILED -- no local TeX installation;
+%% compile on Overleaf, where elsarticle.cls ships by default.
+%%
+%% Key differences from the svjour3 version this replaces:
+%%   - frontmatter block instead of \maketitle + \institute
+%%   - theorem environments must be declared HERE (svjour3 predefined them)
+%%   - \journalname, \titlerunning, \smartqed all removed (Springer-only)
+%%   - bibliography style elsarticle-num instead of spmpsci
+
+\documentclass[preprint,12pt]{elsarticle}
+
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{amsthm}  % elsarticle has no proof environment; svjour3 provided one
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{adjustbox}
+\usepackage{float}
+\usepackage{bm}
+\usepackage{url}
+
+%% elsarticle does NOT predefine these -- svjour3 did, which is why the
+%% Springer version carried a comment warning against redeclaring them.
+\newtheorem{proposition}{Proposition}
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+\newtheorem{remark}{Remark}
+\newtheorem{definition}{Definition}
+
+\journal{Computers \& Operations Research}
+
+\begin{document}
+
+\begin{frontmatter}
+
+\title{Learning When to Fire: A Minimal-Learning Framework for\\
+Dynamic Weapon-Target Assignment}
+
+%% Author block. NOTE: a third author may be added -- an optimization
+%% collaborator is being approached to strengthen the exact-method baseline
+%% (Section~\ref{sec:results}). Do not finalize the author list or the
+%% credit statement until that is settled.
+\author[intel]{Jaejin Lee\corref{cor1}}
+\ead{jaejin.lee@intel.com}
+\cortext[cor1]{Corresponding author.}
+
+\author[asu]{George Runger}
+\ead{george.runger@asu.edu}
+
+\address[intel]{Intel Corporation, Chandler, AZ 85226, USA}
+\address[asu]{School of Computing and Augmented Intelligence, Arizona State University, Tempe, AZ 85281, USA}
+
+\begin{abstract}
+The Dynamic Weapon-Target Assignment Problem (DWTA) asks, at every stage of
+an engagement, which weapons should fire and what each should engage, subject
+to reload times, ammunition limits, and target availability windows. Learned
+approaches typically ask a policy to produce both. We show that only the first
+needs learning.
+
+Given the set of weapons firing at a stage, assigning targets among them is
+monotone submodular maximization under a partition matroid, and assigning
+many-to-one by each weapon's exact marginal value attains at least half the
+stage optimum with no learned parameters. The guarantee holds for any firing
+set, including one produced by all weapons deciding at once, so the contention
+that communication layers and conflict handlers exist to resolve never arises,
+and our architecture has neither. Deciding which weapons fire admits no such
+treatment: holding fire is worth nothing within a stage and everything across
+stages, and we prove that any rule optimizing the current stage can destroy an
+arbitrarily small fraction of what an optimal policy destroys.
+
+We therefore learn that decision and nothing else, one Bernoulli parameter per
+weapon per stage, delegating assignment to the greedy rule and schedule
+revision to a fixed local search that cannot degrade a schedule. Trained only
+on instances of 5 to 7 weapons, targets and stages, the framework generalizes
+zero-shot to 70 weapons, 100 targets and 15 stages, where it lowers the mean
+objective 14.9\% below the strongest learned baseline while running 2.3 times
+faster.
+%% Keywords live in the skeleton's \begin{keyword} block (elsarticle style),
+%% NOT here -- \keywords is a Springer command and is undefined in elsarticle.
+\end{abstract}
+
+\begin{keyword}
+reinforcement learning \sep combinatorial optimization \sep submodular maximization
+\sep local search \sep dynamic weapon-target assignment \sep approximation guarantees
+\end{keyword}
+
+\end{frontmatter}
+
+%% \input rather than \include: \include forces a page break before and
+%% after every section, which a journal manuscript should not have.
+\input{introduction}
+\input{related_works}
+\input{problem_definition}
+\input{MDP}
+\input{method}
+%% \input{theoretical_analysis}  %% retired 2026-09-14: the two
+%% propositions now sit in method.tex beside the steps they justify.
+\input{Experiment}
+\input{conclusion}
+
+%% ============================================================
+%% CRediT statement. Roles for the second author confirmed by the
+%% corresponding author 2026-09-13: ideation, methodology review, manuscript
+%% revision. Do not add roles beyond those.
+%% ============================================================
+
+\section*{CRediT authorship contribution statement}
+
+\textbf{Jaejin Lee:} Conceptualization, Methodology, Software, Validation,
+Formal analysis, Investigation, Data curation, Writing -- original draft,
+Visualization. \textbf{George Runger:} Conceptualization, Methodology
+(review), Writing -- review and editing, Supervision.
+
+\section*{Declaration of competing interest}
+The authors declare that they have no known competing financial interests or
+personal relationships that could have appeared to influence the work
+reported in this paper.
+
+\section*{Data availability}
+The test instances, trained model checkpoints, and evaluation code are
+available at \url{https://github.com/jlee-105/BRELA}.
+
+\bibliographystyle{elsarticle-num}
+\bibliography{references}
+
+\appendix
+\input{appendix_model}
+\input{appendix}
+
+\end{document}

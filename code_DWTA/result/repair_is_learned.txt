@@ -1,0 +1,14 @@
+Using CUDA GPU
+[OK] All hyperparameters validated successfully!
+   Problem size: 5W x 5T, MAX_TIME=5
+   Model: EMBEDDING_DIM=128, HEAD_NUM=8
+   Training: 200 epochs, 5 episodes/epoch
+config              K0     lrnK3     rndK3    lrnK10    rndK10
+5M_5N_5T        0.2486    0.1929    0.2085    0.1794    0.1991
+5M_7N_5T        0.3213    0.2764    0.2874    0.2696    0.2773
+10M_15N_5T      0.2911    0.2686    0.2799    0.2640    0.2715
+15M_15N_5T      0.1215    0.1150    0.1169    0.1108    0.1146
+15M_20N_5T      0.2150    0.1949    0.2060    0.1831    0.1992
+20M_30N_5T      0.2599    0.2451    0.2543    0.2302    0.2484
+30M_30N_10T     0.0153    0.0133    0.0137    0.0122    0.0123
+30M_40N_10T     0.0361    0.0340    0.0346    0.0331    0.0333

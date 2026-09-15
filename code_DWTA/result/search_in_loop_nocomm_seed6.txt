@@ -1,0 +1,110 @@
+Using CUDA GPU
+[OK] All hyperparameters validated successfully!
+   Problem size: 5W x 5T, MAX_TIME=5
+   Model: EMBEDDING_DIM=128, HEAD_NUM=8
+   Training: 200 epochs, 5 episodes/epoch
+fast_eval: selecting checkpoints on [(5, 7, 5), (15, 20, 5), (30, 40, 10), (50, 70, 15)] at K=3
+arch=nocomm | 1307778 parameters
+step    5 | loss   0.5581 | pre 0.4188 -> post 0.4188 | 95s
+step   10 | loss   0.8028 | pre 0.4691 -> post 0.4678 | 205s
+step   15 | loss   1.0745 | pre 0.4043 -> post 0.3254 | 276s
+step   20 | loss   0.7670 | pre 0.2370 -> post 0.2312 | 345s
+EVAL step   20 | construction 0.5089 | +search K=3 0.5089  <-- best, saved
+step   25 | loss   0.7225 | pre 0.3039 -> post 0.3037 | 543s
+step   30 | loss   0.7374 | pre 0.2088 -> post 0.2076 | 636s
+step   35 | loss  -0.1120 | pre 0.3365 -> post 0.3261 | 699s
+step   40 | loss  -0.2279 | pre 0.2054 -> post 0.2050 | 786s
+EVAL step   40 | construction 0.4218 | +search K=3 0.4218  <-- best, saved
+step   45 | loss  -0.3026 | pre 0.2877 -> post 0.2803 | 971s
+step   50 | loss   0.2581 | pre 0.1753 -> post 0.1750 | 1068s
+step   55 | loss   0.1975 | pre 0.1669 -> post 0.1660 | 1163s
+step   60 | loss   0.7099 | pre 0.3174 -> post 0.3172 | 1275s
+EVAL step   60 | construction 0.3561 | +search K=3 0.3551  <-- best, saved
+step   65 | loss  -0.9898 | pre 0.1002 -> post 0.0987 | 1458s
+step   70 | loss   0.0307 | pre 0.2314 -> post 0.2304 | 1550s
+step   75 | loss  -0.2953 | pre 0.1650 -> post 0.1598 | 1623s
+step   80 | loss  -0.5139 | pre 0.1112 -> post 0.1104 | 1706s
+EVAL step   80 | construction 0.2859 | +search K=3 0.2858  <-- best, saved
+step   85 | loss  -0.7931 | pre 0.0580 -> post 0.0568 | 1882s
+step   90 | loss   0.0623 | pre 0.2832 -> post 0.2813 | 1968s
+step   95 | loss   0.2382 | pre 0.1559 -> post 0.1472 | 2067s
+step  100 | loss  -0.3023 | pre 0.2377 -> post 0.2370 | 2165s
+EVAL step  100 | construction 0.3682 | +search K=3 0.3677
+step  105 | loss   0.6745 | pre 0.2828 -> post 0.2825 | 2352s
+step  110 | loss   1.2411 | pre 0.3768 -> post 0.3757 | 2456s
+step  115 | loss  -0.2057 | pre 0.1795 -> post 0.1766 | 2549s
+step  120 | loss   0.4194 | pre 0.2573 -> post 0.2569 | 2653s
+EVAL step  120 | construction 0.2693 | +search K=3 0.2683  <-- best, saved
+step  125 | loss   0.6183 | pre 0.3300 -> post 0.3293 | 2863s
+step  130 | loss  -0.3075 | pre 0.1529 -> post 0.1508 | 2940s
+step  135 | loss   0.5003 | pre 0.2777 -> post 0.2571 | 3029s
+step  140 | loss   0.1723 | pre 0.0970 -> post 0.0816 | 3114s
+EVAL step  140 | construction 0.1662 | +search K=3 0.1657  <-- best, saved
+step  145 | loss  -0.6496 | pre 0.0636 -> post 0.0633 | 3281s
+step  150 | loss   0.0376 | pre 0.2707 -> post 0.2626 | 3377s
+step  155 | loss  -0.4999 | pre 0.3820 -> post 0.3807 | 3458s
+step  160 | loss  -0.7055 | pre 0.2348 -> post 0.2338 | 3550s
+EVAL step  160 | construction 0.2063 | +search K=3 0.2053
+step  165 | loss   0.0331 | pre 0.2375 -> post 0.2366 | 3747s
+step  170 | loss  -0.1724 | pre 0.1641 -> post 0.1529 | 3832s
+step  175 | loss   0.1468 | pre 0.0632 -> post 0.0626 | 3924s
+step  180 | loss  -0.2122 | pre 0.2284 -> post 0.2237 | 4021s
+EVAL step  180 | construction 0.1488 | +search K=3 0.1461  <-- best, saved
+step  185 | loss  -0.2194 | pre 0.0980 -> post 0.0725 | 4193s
+step  190 | loss   0.0626 | pre 0.1342 -> post 0.1278 | 4279s
+step  195 | loss   0.2228 | pre 0.2324 -> post 0.2318 | 4380s
+step  200 | loss   0.3733 | pre 0.2352 -> post 0.2314 | 4488s
+EVAL step  200 | construction 0.1604 | +search K=3 0.1540
+step  205 | loss  -0.0085 | pre 0.2174 -> post 0.1891 | 4653s
+step  210 | loss   0.2985 | pre 0.1581 -> post 0.1577 | 4760s
+step  215 | loss  -0.2210 | pre 0.1417 -> post 0.1272 | 4852s
+step  220 | loss  -0.2219 | pre 0.2300 -> post 0.2269 | 4937s
+EVAL step  220 | construction 0.1537 | +search K=3 0.1512
+step  225 | loss   0.0903 | pre 0.3342 -> post 0.3309 | 5109s
+step  230 | loss  -0.2596 | pre 0.3278 -> post 0.3263 | 5222s
+step  235 | loss  -0.0821 | pre 0.0183 -> post 0.0170 | 5338s
+step  240 | loss  -0.5361 | pre 0.1390 -> post 0.1374 | 5421s
+EVAL step  240 | construction 0.2847 | +search K=3 0.2847
+step  245 | loss  -0.0781 | pre 0.2878 -> post 0.2866 | 5607s
+step  250 | loss   0.1490 | pre 0.1193 -> post 0.1106 | 5697s
+step  255 | loss  -0.3519 | pre 0.0799 -> post 0.0776 | 5792s
+step  260 | loss   0.0648 | pre 0.3183 -> post 0.3136 | 5864s
+EVAL step  260 | construction 0.1596 | +search K=3 0.1590
+step  265 | loss  -0.9906 | pre 0.0974 -> post 0.0955 | 6042s
+step  270 | loss  -0.0373 | pre 0.1169 -> post 0.1019 | 6125s
+step  275 | loss   0.1200 | pre 0.2660 -> post 0.2614 | 6209s
+step  280 | loss  -0.0020 | pre 0.1811 -> post 0.1801 | 6303s
+EVAL step  280 | construction 0.2351 | +search K=3 0.2350
+step  285 | loss   0.0708 | pre 0.0683 -> post 0.0653 | 6469s
+step  290 | loss   0.0138 | pre 0.3921 -> post 0.3689 | 6540s
+step  295 | loss  -0.3479 | pre 0.0614 -> post 0.0572 | 6631s
+step  300 | loss  -0.0830 | pre 0.2062 -> post 0.2056 | 6738s
+EVAL step  300 | construction 0.2384 | +search K=3 0.2382
+step  305 | loss  -0.2107 | pre 0.2086 -> post 0.2063 | 6933s
+step  310 | loss  -0.0037 | pre 0.1026 -> post 0.1024 | 7025s
+step  315 | loss   0.1384 | pre 0.1982 -> post 0.1689 | 7117s
+step  320 | loss  -0.0000 | pre 0.1608 -> post 0.1550 | 7203s
+EVAL step  320 | construction 0.1612 | +search K=3 0.1604
+step  325 | loss  -0.3521 | pre 0.1759 -> post 0.1754 | 7402s
+step  330 | loss  -0.4469 | pre 0.0748 -> post 0.0742 | 7526s
+step  335 | loss  -0.0093 | pre 0.0740 -> post 0.0714 | 7614s
+step  340 | loss   0.1188 | pre 0.0559 -> post 0.0463 | 7700s
+EVAL step  340 | construction 0.1316 | +search K=3 0.1296  <-- best, saved
+step  345 | loss   0.0060 | pre 0.0421 -> post 0.0399 | 7875s
+step  350 | loss   0.1297 | pre 0.2971 -> post 0.2959 | 7965s
+step  355 | loss   0.4265 | pre 0.3565 -> post 0.3561 | 8048s
+step  360 | loss   0.0104 | pre 0.0780 -> post 0.0759 | 8153s
+EVAL step  360 | construction 0.2620 | +search K=3 0.2620
+step  365 | loss  -0.3768 | pre 0.1710 -> post 0.1675 | 8341s
+step  370 | loss   0.0227 | pre 0.1452 -> post 0.1448 | 8447s
+step  375 | loss  -0.0353 | pre 0.1845 -> post 0.1778 | 8545s
+step  380 | loss   0.0066 | pre 0.2542 -> post 0.2525 | 8633s
+EVAL step  380 | construction 0.1896 | +search K=3 0.1892
+step  385 | loss  -0.0606 | pre 0.0425 -> post 0.0410 | 8817s
+step  390 | loss  -0.1534 | pre 0.1164 -> post 0.1148 | 8900s
+step  395 | loss   0.1155 | pre 0.2234 -> post 0.2220 | 8991s
+step  400 | loss  -0.2141 | pre 0.1110 -> post 0.1069 | 9079s
+EVAL step  400 | construction 0.1487 | +search K=3 0.1464
+
+best post-search mean over 12 configs: 0.1296
+checkpoint: result/SearchInLoop_seed6_nocomm_best.pt
