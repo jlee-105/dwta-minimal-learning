@@ -1,11 +1,6 @@
 \section{Introduction}
 \label{sec:introduction}
 
-%% Introduction, finalized 2026-09-13 after a full line-by-line editing pass
-%% with the user. MOVES 1-3 are reproduced here too (previously pulled from
-%% BReRLA_manuscript.tex 699-708) so the whole section lives in one file;
-%% assemble.py's carry-over of those lines is now redundant but harmless.
-
 The weapon-target assignment problem (WTA), first formalized by Manne in
 1958~\cite{manne1958target}, remains an active research problem
 today~\cite{ahuja2007exact} because of its continued relevance to modern
@@ -42,51 +37,72 @@ producing either a target assignment or a decision to skip firing for each
 weapon within a stage~\cite{na2023weapon,gaudet2023,yoontransformer}. This is
 consistent with the standard design in neural combinatorial
 optimization~\cite{kool2018attention,kwon2020pomo}, but it requires the
-policy to learn two heterogeneous decisions, which makes the learning 
-more difficult. The two decisions are fundamentally different. Target
-assignment can be determined from information already known at the current
-stage, such as remaining target values, kill probabilities, and current
-engagement legality. In contrast, whether to fire depends on the consequences
-of preserving ammunition for future stages, which have not yet occurred.
-Treating both decisions as a single learning problem obscures this
-distinction, and we show that it comes at a measurable cost.
+policy to learn two heterogeneous decisions, which makes the learning
+more difficult.
 
-Our claim is that only one of these two decisions needs to be learned. Once
-the set of firing weapons is known, their assignment to targets can be solved
-directly: a simple greedy rule on marginal value, requiring no training or
-learned parameters, provably achieves at least half of the best possible assignment
-value (Proposition~\ref{prop:auction-half}). Deciding which weapons should
-fire admits no equivalent shortcut. Holding fire provides no benefit within
-the current stage and pays off only through future engagements, so any rule
-based solely on the current stage can be arbitrarily poor. We show that such
-a rule can destroy substantially less target value than an optimal policy
-would (Proposition~\ref{prop:myopic-gap}). Thus, we train the model whether to fire or hold and, argue that this minimal learning can achieve reasonably good solutions.
+The two decisions are not equally hard to replace. Target assignment can be
+determined from information already known at the current stage, such as
+remaining target values, kill probabilities, and current engagement legality.
+Whether to fire depends on the consequences of preserving ammunition for
+stages that have not yet occurred. That asymmetry is not merely descriptive.
+It decides which of the two admits a classical mechanism with a guarantee,
+and which does not.
+
+\paragraph{A criterion for what to learn} We propose cutting a learned
+pipeline where a classical subroutine can be held to a per-stage approximation
+guarantee, and reserving learning for the part where no per-stage rule can
+carry such a guarantee even in principle. The criterion can be checked before
+any training run, and in DWTA it separates the two decisions cleanly.
+
+On one side, once the set of firing weapons is known, assigning targets among
+them is monotone submodular maximization under a partition matroid. A greedy
+rule on exact marginal values, requiring no training and no learned
+parameters, attains at least half of the best possible assignment for that
+stage (Proposition~\ref{prop:auction-half}). The bound holds for \emph{any}
+firing set, so it does not matter whether that set was produced by weapons
+deciding one at a time or all at once.
+
+On the other side, deciding which weapons fire admits no equivalent shortcut.
+Holding fire provides no benefit within the current stage and pays off only
+through future engagements, so any rule based solely on the current stage can
+be arbitrarily poor. We show that such a rule can destroy an arbitrarily small
+fraction of what an optimal policy destroys
+(Proposition~\ref{prop:myopic-gap}). This is the part that has to be learned,
+and by this criterion it is the only part.
 
 We build this idea into a simple system. A graph neural network considers all
 weapons and targets jointly and outputs one number per weapon: the
 probability that it should fire in the current stage. All weapons are
-decided in a single pass rather than one at a time. A greedy marginal-value rule then
-assigns the firing weapons to targets, and a lightweight search revisits the
-completed schedule by flipping individual fire-or-hold decisions and
-retaining only changes that improve the result. Trained on small instances
+decided in a single pass rather than one at a time. A greedy marginal-value
+rule then assigns the firing weapons to targets, and a lightweight search
+revisits the completed schedule by flipping individual fire-or-hold decisions
+and retaining only changes that improve the result. Trained on small instances
 (5 to 7 weapons, targets, and stages), the policy generalizes without
 further training to problems up to ten times larger, reaching 70 weapons,
 100 targets, and 15 stages.
 
+The measurements support the criterion from both directions. Every baseline
+that learns the target choice in addition to the firing decision is beaten, so
+taking target selection out of the policy costs nothing that a learned target
+head was supplying. The same pipeline with the learned firing decision
+removed, which is exactly the greedy heuristic, is four times worse. The value
+sits where the criterion says it should.
+
 The main contributions of this study are summarized as follows:
 
 \begin{itemize}
-\item \textbf{A decomposition with a reason for every part}: We split the
-per-stage decision in two. Target assignment is decided by a greedy marginal-value rule with
-a provable $\tfrac12$ approximation guarantee (Proposition~\ref{prop:auction-half}). It holds even when weapons decide independently and simultaneously
-(Remark~\ref{rem:auction-kills-pileon}). Only the fire and hold (participation decision) is learned for each weapon within the stage (Proposition~\ref{prop:myopic-gap}).
+\item \textbf{A criterion for where to cut a learned pipeline}: Delegate the
+part of the decision that admits a per-stage approximation guarantee, and
+learn the part for which no per-stage rule can have one. Both sides are
+established for DWTA (Propositions~\ref{prop:auction-half}
+and~\ref{prop:myopic-gap}), and the criterion is checkable before any training
+run.
 
-\item \textbf{Learning strictly less, and outperforms baselines}: The
-policy outputs one Bernoulli parameter per weapon per stage, not a target
+\item \textbf{Learning strictly less, and performing better}: The policy
+outputs one Bernoulli parameter per weapon per stage, not a target
 distribution. This reduces the mean objective by 14.9\% across twelve
-configurations and outperforms every richer alternative we trained.
-
-\item \textbf{A provably safe improvement step}: At inference we flip individual fire-or-hold decisions and keep only those the re-simulated objective confirms. This reduces the mean objective from 0.1219 to 0.1179 at a budget of ten re-simulations and to 0.1155 at thirty, uses no learned parameters, and cannot make a schedule worse at any budget (Proposition~\ref{prop:search-monotone}).
+configurations relative to the strongest baseline that learns both decisions,
+and outperforms every richer alternative we trained.
 
 \item \textbf{Simultaneous decisions with no coordination machinery}: All
 weapons are decided in a single pass. The assignment guarantee holds for any
@@ -97,9 +113,14 @@ weapon-to-weapon attention under an identical recipe makes the pipeline
 slightly worse and three times less stable across seeds
 (Section~\ref{sec:ablation}).
 
+\item \textbf{A provably safe improvement step}: At inference we flip
+individual fire-or-hold decisions and keep only those the re-simulated
+objective confirms. The step uses no learned parameters and cannot make a
+schedule worse at any budget (Proposition~\ref{prop:search-monotone}).
+
 \item \textbf{Rigorous, standardized benchmarking}: Evaluation spans four
-size tiers up to $70\times100\times15$ under resource scarcity, against exact solution approach,
-a greedy heuristic, the auction alone, a sequential decoder, and other RL approaches such as AM and POMO
-baselines~\cite{kool2018attention,kwon2020pomo}, all under an identical
-protocol.
+size tiers up to $70\times100\times15$ under resource scarcity, against an
+exact solver, a greedy heuristic, a price-based auction, a sequential decoder,
+and the AM and POMO baselines~\cite{kool2018attention,kwon2020pomo}, all under
+an identical protocol and on identical instances.
 \end{itemize}

@@ -59,6 +59,10 @@ def main():
     parser.add_argument('--eval_every', type=int, default=100)
     parser.add_argument('--seed', type=int, default=5)
     parser.add_argument('--max_grad_norm', type=float, default=1.0)
+    # RL4CO's AM defaults to three encoder layers, which leaves it at roughly
+    # half the capacity of every other learned method in the comparison.
+    # Exposed so the baseline can be matched to the others.
+    parser.add_argument('--num_encoder_layers', type=int, default=3)
     args = parser.parse_args()
 
     torch.manual_seed(args.seed)
@@ -67,7 +71,7 @@ def main():
 
     policy = AttentionModelPolicy(
         embed_dim=args.embed_dim,
-        num_encoder_layers=3,
+        num_encoder_layers=args.num_encoder_layers,
         num_heads=8,
         env_name='dwta',
         init_embedding=DWTAInitEmbedding(args.embed_dim),
@@ -86,7 +90,10 @@ def main():
 
     best_mean_score = float('inf')
     best_step = -1
-    best_path = f"result/RL4CO_AM_multiscale_seed{args.seed}_best_policy.pt"
+    # Encoder depth is in the filename so a deeper run cannot overwrite the
+    # three-layer checkpoint the earlier table was produced from.
+    depth_tag = "" if args.num_encoder_layers == 3 else f"_L{args.num_encoder_layers}"
+    best_path = f"result/RL4CO_AM_multiscale_seed{args.seed}{depth_tag}_best_policy.pt"
 
     t0 = time.time()
     for step in range(1, args.total_steps + 1):
@@ -144,7 +151,7 @@ def main():
                   f"(best so far: {best_mean_score:.4f} at step {best_step})", flush=True)
             policy.train()
 
-    save_path = f"result/RL4CO_AM_multiscale_seed{args.seed}_final_policy.pt"
+    save_path = f"result/RL4CO_AM_multiscale_seed{args.seed}{depth_tag}_final_policy.pt"
     torch.save(policy.state_dict(), save_path)
     print(f"Saved final policy to {save_path}")
     print(f"Saved best policy (step {best_step}, mean_across_12_configs={best_mean_score:.4f}) to {best_path}")

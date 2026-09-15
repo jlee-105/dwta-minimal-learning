@@ -248,6 +248,17 @@ the margin between it and the learned pipeline is an empirical estimate of
 how much this gap costs on realistic instances rather than adversarial ones.
 \end{remark}
 
+\begin{remark}[What is and is not guaranteed]
+\label{rem:scope}
+The bounds above are per-component and per-stage. They do not compose into a
+bound on the full $T$-stage trajectory, and the learned participation policy
+carries no approximation guarantee. That is not an omission:
+Proposition~\ref{prop:myopic-gap} says no rule confined to a stage can carry
+one, so a poor firing set composed with an optimal assignment is still
+arbitrarily bad. The policy is a heuristic and is evaluated as one, in
+Section~\ref{sec:results}.
+\end{remark}
+
 \subsection{Local Search Over the Completed Schedule}
 \label{sec:local-search}
 

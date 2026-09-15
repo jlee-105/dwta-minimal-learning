@@ -57,30 +57,36 @@ Dynamic Weapon-Target Assignment}
 \address[asu]{School of Computing and Augmented Intelligence, Arizona State University, Tempe, AZ 85281, USA}
 
 \begin{abstract}
-The Dynamic Weapon-Target Assignment Problem (DWTA) asks, at every stage of
-an engagement, which weapons should fire and what each should engage, subject
-to reload times, ammunition limits, and target availability windows. Learned
-approaches typically ask a policy to produce both. We show that only the first
-needs learning.
+The Dynamic Weapon-Target Assignment Problem (DWTA) asks, at every stage of an
+engagement, which weapons should fire and which target each should engage,
+subject to reload times, ammunition limits, and target availability windows.
+Learned methods for this problem train a policy to produce both decisions. We
+argue that the two are not alike, and that only one of them should be learned.
 
-Given the set of weapons firing at a stage, assigning targets among them is
-monotone submodular maximization under a partition matroid, and assigning
-many-to-one by each weapon's exact marginal value attains at least half the
-stage optimum with no learned parameters. The guarantee holds for any firing
-set, including one produced by all weapons deciding at once, so the contention
-that communication layers and conflict handlers exist to resolve never arises,
-and our architecture has neither. Deciding which weapons fire admits no such
-treatment: holding fire is worth nothing within a stage and everything across
-stages, and we prove that any rule optimizing the current stage can destroy an
-arbitrarily small fraction of what an optimal policy destroys.
+What separates them is whether a classical mechanism can be held to a
+guarantee. Given the set of weapons firing at a stage, assigning targets among
+them is monotone submodular maximization under a partition matroid, so
+assigning many-to-one by each weapon's exact marginal value attains at least
+half the stage optimum with no learned parameters. That bound holds for any
+firing set, including one produced by all weapons deciding at the same
+instant, which is why our architecture needs neither a communication layer nor
+a conflict handler. Choosing which weapons fire admits no such treatment.
+Holding fire is worth nothing within a stage and everything across stages, and
+we prove that any rule optimizing the current stage can destroy an arbitrarily
+small fraction of what an optimal policy destroys. This yields a criterion for
+where to cut a learned pipeline, checkable before any training run: delegate
+the part that carries a per-stage guarantee, and learn the part that provably
+cannot have one.
 
-We therefore learn that decision and nothing else, one Bernoulli parameter per
-weapon per stage, delegating assignment to the greedy rule and schedule
-revision to a fixed local search that cannot degrade a schedule. Trained only
-on instances of 5 to 7 weapons, targets and stages, the framework generalizes
-zero-shot to 70 weapons, 100 targets and 15 stages, where it lowers the mean
-objective 14.9\% below the strongest learned baseline while running 2.3 times
-faster.
+Applied to DWTA the criterion leaves one bit per weapon per stage. A graph
+neural network emits that bit for every weapon in a single pass; the greedy
+rule assigns targets; a fixed local search then revises the schedule and
+cannot degrade it. Trained only on instances of 5 to 7 weapons, targets and
+stages, the framework generalizes zero-shot to 70 weapons, 100 targets and 15
+stages. It outperforms every baseline that learns both decisions, lowering the
+mean objective 14.9\% below the strongest of them while running 2.3 times
+faster, and the same pipeline with the learned bit removed is four times
+worse, which locates the value precisely where the criterion predicts.
 %% Keywords live in the skeleton's \begin{keyword} block (elsarticle style),
 %% NOT here -- \keywords is a Springer command and is undefined in elsarticle.
 \end{abstract}

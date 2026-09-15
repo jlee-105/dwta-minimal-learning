@@ -1,3 +1,104 @@
+\section{Training budgets and model capacity}
+\label{app:fairness}
+
+A comparison between learned methods is only informative if the methods were
+given comparable resources. Table~\ref{tab:fairness} lists what each one
+actually received. Every learned method trains on the same curriculum, draws
+instances from the same generator, and is evaluated zero-shot on the same
+twelve held-out configurations under the same protocol.
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{What each learned method was given. \emph{Instances seen} counts
+training instances drawn, not gradient steps: our method draws $P{=}10$
+rollouts per instance, so it performs more rollouts than instances. AM and
+POMO use the RL4CO defaults for their architectures; we did not reduce them.}
+\label{tab:fairness}
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+ & Parameters & Encoder & Instances seen & Learning rate \\
+\midrule
+AM~\cite{kool2018attention}   & 694{,}528   & Transformer, 3 layers & 512{,}000 & $1\times10^{-4}$ \\
+POMO~\cite{kwon2020pomo}      & 1{,}289{,}344 & Transformer, 6 layers & 128{,}000 & $1\times10^{-4}$ \\
+Sequential                    & 1{,}291{,}394 & GNN, 3 layers         & 15{,}000  & $5\times10^{-4}$ \\
+\textbf{Ours}                 & 1{,}307{,}778 & GNN, 3 layers         & \textbf{6{,}000} & $5\times10^{-4}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Two things are worth drawing out. Capacity is within 2\% across our method,
+Sequential and POMO; AM is smaller only because RL4CO's attention model
+defaults to three encoder layers, and we left that default alone rather than
+enlarging a baseline to match ours. Training budget runs the other way: AM
+draws roughly 85 times as many instances as we do and POMO roughly 21 times,
+because both use the batch sizes their own implementations ship with. The
+proposed method is therefore not the one that received the most training, and
+the comparison does not rest on having trained it harder.
+
+No method here received hyperparameter tuning. The values in
+Table~\ref{tab:hyperparameters} and the RL4CO defaults were used as they
+stand, and the only parameter this paper sweeps is the inference-time search
+budget $K$ (Section~\ref{sec:budget}), which no baseline uses. A tuned
+baseline could close some of the gap; we report the untuned comparison
+because tuning every method to the same standard was beyond what we could do,
+and because tuning only our own would have been worse.
+
+\section{What the exact solver actually returns}
+\label{app:scip}
+
+The SCIP column of Table~\ref{tab:main_results} is not an optimum except at
+the two smallest configurations. SCIP is given 600\,s per instance and reports
+its incumbent when the budget runs out, so the comparison is against a
+time-limited incumbent almost everywhere. Table~\ref{tab:scip} records where
+the line falls.
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{SCIP under a 600\,s limit on the ten reported instances per
+configuration. \emph{Proved} counts instances closed to optimality. The final
+column is the mean relative gap on the instances SCIP did not close; entries
+marked $\gg$ are configurations where no useful dual bound was found at all,
+leaving the reported gap effectively unbounded.}
+\label{tab:scip}
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+Config & Proved & Mean time & Gap if unproved \\
+\midrule
+(5,5,5)     & 10/10 & 5.2\,s   & --- \\
+(5,7,5)     & 10/10 & 3.4\,s   & --- \\
+(10,15,5)   & 6/10  & 279.4\,s & 20.2\% \\
+\midrule
+(15,15,5)   & 0/10  & 600.0\,s & $\gg$ \\
+(15,20,5)   & 0/10  & 600.0\,s & 71.1\% \\
+(20,30,5)   & 1/10  & 589.5\,s & 27.6\% \\
+\midrule
+(30,30,10)  & 0/10  & 600.0\,s & $\gg$ \\
+(30,40,10)  & 0/10  & 600.0\,s & $\gg$ \\
+(40,50,10)  & 0/10  & 600.4\,s & $\gg$ \\
+\midrule
+(50,50,15)  & 0/10  & 601.4\,s & $\gg$ \\
+(50,70,15)  & 0/10  & 601.8\,s & $\gg$ \\
+(70,100,15) & 0/10  & 604.6\,s & $\gg$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Two readings follow. At the Small tier the comparison is against a genuine
+optimum, and SCIP wins there, as it should: 26 of the 30 instances in that
+tier are closed. From (15,15,5) onward almost nothing is closed, the solver
+spends its full budget on every instance, and on most configurations it
+returns no dual bound worth reporting, so its column should be read as a
+strong incumbent rather than a bound on what is achievable. That is also why
+SCIP's objective at the two largest configurations, 0.992 and 0.993, is close
+to leaving the entire target set intact: with 600\,s it does not reach a
+competitive solution at that size at all.
+
+The practical reading is that an exact solver remains the right tool where it
+finishes. The case for a learned policy is confined to the region where it
+does not, and Table~\ref{tab:scip} marks where that region begins.
+
 \section{Evaluation traces}
 \label{app:traces}
 

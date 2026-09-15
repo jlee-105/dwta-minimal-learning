@@ -1,0 +1,32 @@
+Using CUDA GPU
+[OK] All hyperparameters validated successfully!
+   Problem size: 5W x 5T, MAX_TIME=5
+   Model: EMBEDDING_DIM=128, HEAD_NUM=8
+   Training: 200 epochs, 5 episodes/epoch
+arch=comm | 1440515 parameters
+step    5 | loss  -0.1662 | pre 0.2254 -> post 0.2143 | 72s
+step   10 | loss   1.1794 | pre 0.2981 -> post 0.2977 | 110s
+step   15 | loss   0.0746 | pre 0.2712 -> post 0.2187 | 143s
+step   20 | loss   0.1736 | pre 0.1709 -> post 0.1685 | 192s
+VAL  step   20 | held-out @ train scale, K=10: 0.1787  <-- best, saved
+step   25 | loss  -0.2247 | pre 0.3796 -> post 0.3754 | 236s
+step   30 | loss  -0.3617 | pre 0.2703 -> post 0.2688 | 279s
+step   35 | loss   0.3146 | pre 0.4865 -> post 0.4861 | 318s
+step   40 | loss   0.0198 | pre 0.2219 -> post 0.2080 | 352s
+VAL  step   40 | held-out @ train scale, K=10: 0.2304
+step   45 | loss  -0.3112 | pre 0.3220 -> post 0.3031 | 391s
+step   50 | loss  -0.0507 | pre 0.2380 -> post 0.2329 | 434s
+step   55 | loss   0.2499 | pre 0.6491 -> post 0.6491 | 474s
+step   60 | loss  -0.0000 | pre 0.3229 -> post 0.3229 | 520s
+VAL  step   60 | held-out @ train scale, K=10: 0.5869
+step   65 | loss  -0.0000 | pre 0.1619 -> post 0.1619 | 558s
+step   70 | loss  -0.0000 | pre 0.5158 -> post 0.5158 | 600s
+step   75 | loss  -0.0000 | pre 0.3296 -> post 0.3296 | 639s
+step   80 | loss  -0.0000 | pre 0.5284 -> post 0.5284 | 680s
+VAL  step   80 | held-out @ train scale, K=10: 0.5869
+step   85 | loss  -0.0000 | pre 0.5286 -> post 0.5286 | 718s
+step   90 | loss  -0.0000 | pre 0.1749 -> post 0.1749 | 759s
+step   95 | loss   0.2030 | pre 0.2207 -> post 0.2207 | 801s
+step  100 | loss  -0.0000 | pre 0.4436 -> post 0.4436 | 839s
+VAL  step  100 | held-out @ train scale, K=10: 0.5869
+step  105 | loss   0.1370 | pre 0.3475 -> post 0.3475 | 880s

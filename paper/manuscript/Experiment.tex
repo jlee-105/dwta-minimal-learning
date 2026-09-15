@@ -210,6 +210,18 @@ configurations is 0.122, against 0.143 for the strongest neural baseline
 (Sequential), a 14.9\% relative reduction. Every non-exact baseline is beaten
 on the mean.
 
+The table answers two questions at once, and they are the two the
+decomposition rests on. \textsc{AM}, \textsc{POMO} and \textsc{Sequential}
+all learn the target choice as well as the firing decision, and all three are
+beaten: 0.326, 0.270 and 0.143 against our 0.122. Removing target selection
+from the policy therefore costs nothing that a learned target head was
+supplying. \textsc{Greedy}, at the other end, assigns targets by the same rule
+we do and differs only in that no policy decides which weapons fire; it scores
+0.490. The firing decision is thus where essentially all of the value sits,
+and it is the one part for which Proposition~\ref{prop:myopic-gap} rules out
+any per-stage substitute. Learning less does not cost accuracy here; learning
+the right part is what buys it.
+
 The per-configuration picture is more informative than the mean, and splits
 cleanly by tier. Against SCIP, we lose all six Small and Medium
 configurations and win all six Large and Battlefield ones. That is the
@@ -238,10 +250,17 @@ which training run is used.
 \centering
 \small
 \caption{Mean wall-clock time per instance in seconds, averaged over the three
-configurations in each tier. All methods decode one instance at a time on the
-same hardware. SCIP is omitted: it is given a fixed 600\,s budget per instance
-rather than running to completion, so its time is a setting, not a
-measurement.}
+configurations in each tier. Every column is the cost of producing one
+schedule: encoding, every network call, the assignment step, and all
+environment simulation, measured end to end with CUDA synchronization after
+untimed warm-up passes. Our column is the construction pass alone, at
+$K{=}0$, which is the budget the table's objectives are reported at; what the
+local search adds on top is in Section~\ref{sec:budget}. All methods decode
+one instance at a time, since RL4CO would otherwise batch AM and POMO into a
+single forward and credit them with parallelism no other method is given.
+SCIP is omitted: it is given a fixed 600\,s budget per instance rather than
+run to completion, so its time is a setting rather than a measurement
+(Appendix~\ref{app:scip}).}
 \label{tab:timing}
 \begin{tabular}{@{}lcccccc@{}}
 \toprule
