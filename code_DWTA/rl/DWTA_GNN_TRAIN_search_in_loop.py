@@ -41,6 +41,7 @@ sys.path.append(os.path.dirname(__file__))
 from common.TORCH_OBJECTS import DEVICE
 from common.DWTA_GNN_comm_sinkhorn import create_gnn_actor_comm_sinkhorn
 from common.DWTA_GNN import create_gnn_actor as create_gnn_actor_nocomm
+from common.DWTA_GNN_firelogit import create_gnn_actor_firelogit
 from common.DWTA_Simulator import Environment
 from common.Dynamic_Instance_generation import input_generation
 from common.Dynamic_Instance_generation_moderate import generate_moderate_training_instances
@@ -252,7 +253,7 @@ def main():
     ap.add_argument("--para_size", type=int, default=10)
     ap.add_argument("--seed", type=int, default=5)
     ap.add_argument("--tag", type=str, default="sil")
-    ap.add_argument("--arch", choices=["comm", "nocomm"], default="comm",
+    ap.add_argument("--arch", choices=["comm", "nocomm", "firelogit"], default="comm",
                     help="'comm' is the reported architecture (weapon-to-weapon "
                          "self-attention + inactive Sinkhorn term); 'nocomm' is the "
                          "same encoder and heads with that attention layer removed, "
@@ -271,8 +272,9 @@ def main():
     np.random.seed(args.seed)
     rng = np.random.default_rng(args.seed)
 
-    mk_actor = (create_gnn_actor_comm_sinkhorn if args.arch == "comm"
-                else create_gnn_actor_nocomm)
+    mk_actor = {"comm": create_gnn_actor_comm_sinkhorn,
+                "nocomm": create_gnn_actor_nocomm,
+                "firelogit": create_gnn_actor_firelogit}[args.arch]
     actor = mk_actor().to(DEVICE)
     print("arch=%s | %d parameters" % (args.arch,
           sum(p.numel() for p in actor.parameters())), flush=True)

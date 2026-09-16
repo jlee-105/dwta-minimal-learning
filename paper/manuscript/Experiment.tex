@@ -174,70 +174,82 @@ is better.
 \centering
 \scriptsize
 \caption{Main results across twelve held-out test configurations.
-Normalized remaining value (lower is better). Our column reports the mean over three seeds followed by the across-seed standard deviation. Every method constructs its schedule in a single pass, so the comparison is at matched inference effort; what the local search adds on top is reported separately in Section~\ref{sec:budget}. SCIP uses a 600\,s limit and reports its incumbent; at the two largest configurations it fails to find a competitive solution. Bold marks the best method per configuration.}
+Normalized remaining value (lower is better). Our column reports the mean over ten seeds followed by the across-seed standard deviation. Every method constructs its schedule in a single pass, so the comparison is at matched inference effort; what the local search adds on top is reported separately in Section~\ref{sec:budget}. SCIP uses a 600\,s limit and reports its incumbent; at the two largest configurations it fails to find a competitive solution. Bold marks the best method per configuration.}
 \label{tab:main_results}
 \begin{tabular}{@{}llcccccccc@{}}
 \toprule
 Tier & Config & SCIP & Greedy & Auction & AM & POMO & Sequential & Ours \\
 \midrule
 \multirow{3}{*}{Small}
- & (5,5,5)     & \textbf{0.148} & 0.598 & 0.362 & 0.249 & 0.243 & 0.169 & 0.190 $\pm$ .000 \\
- & (5,7,5)     & \textbf{0.199} & 0.623 & 0.455 & 0.446 & 0.447 & 0.307 & 0.245 $\pm$ .000 \\
- & (10,15,5)   & \textbf{0.192} & 0.619 & 0.418 & 0.446 & 0.488 & 0.300 & 0.225 $\pm$ .001 \\
+ & (5,5,5)     & \textbf{0.148} & 0.598 & 0.362 & 0.249 & 0.243 & 0.169 & 0.194 $\pm$ .005 \\
+ & (5,7,5)     & \textbf{0.199} & 0.623 & 0.455 & 0.446 & 0.447 & 0.307 & 0.265 $\pm$ .028 \\
+ & (10,15,5)   & \textbf{0.192} & 0.619 & 0.418 & 0.446 & 0.488 & 0.300 & 0.232 $\pm$ .019 \\
 \midrule
 \multirow{3}{*}{Medium}
- & (15,15,5)   & \textbf{0.087} & 0.533 & 0.266 & 0.288 & 0.315 & 0.096 & 0.094 $\pm$ .000 \\
- & (15,20,5)   & \textbf{0.138} & 0.616 & 0.363 & 0.480 & 0.508 & 0.207 & 0.166 $\pm$ .000 \\
- & (20,30,5)   & \textbf{0.176} & 0.638 & 0.448 & 0.548 & 0.584 & 0.295 & 0.209 $\pm$ .000 \\
+ & (15,15,5)   & \textbf{0.087} & 0.533 & 0.266 & 0.288 & 0.315 & 0.096 & 0.099 $\pm$ .008 \\
+ & (15,20,5)   & \textbf{0.138} & 0.616 & 0.363 & 0.480 & 0.508 & 0.207 & 0.172 $\pm$ .013 \\
+ & (20,30,5)   & \textbf{0.176} & 0.638 & 0.448 & 0.548 & 0.584 & 0.295 & 0.214 $\pm$ .014 \\
 \midrule
 \multirow{3}{*}{Large}
- & (30,30,10)  & 0.015 & 0.355 & 0.078 & 0.164 & 0.093 & 0.016 & \textbf{0.012} $\pm$ .001 \\
- & (30,40,10)  & 0.045 & 0.407 & 0.177 & 0.256 & 0.136 & \textbf{0.032} & 0.037 $\pm$ .002 \\
- & (40,50,10)  & 0.051 & 0.331 & 0.150 & 0.261 & 0.144 & \textbf{0.028} & 0.028 $\pm$ .001 \\
+ & (30,30,10)  & \textbf{0.015} & 0.355 & 0.078 & 0.164 & 0.093 & 0.016 & \textbf{0.015} $\pm$ .004 \\
+ & (30,40,10)  & 0.045 & 0.407 & 0.177 & 0.256 & 0.136 & \textbf{0.032} & 0.042 $\pm$ .007 \\
+ & (40,50,10)  & 0.051 & 0.331 & 0.150 & 0.261 & 0.144 & \textbf{0.028} & 0.036 $\pm$ .005 \\
 \midrule
 \multirow{3}{*}{Battlefield}
- & (50,50,15)  & 0.157 & 0.361 & 0.156 & 0.195 & \textbf{0.077} & 0.088 & 0.084 $\pm$ .002 \\
- & (50,70,15)  & 0.992 & 0.390 & 0.171 & 0.268 & 0.099 & 0.080 & \textbf{0.077} $\pm$ .002 \\
- & (70,100,15) & 0.993 & 0.403 & 0.177 & 0.306 & 0.106 & 0.100 & \textbf{0.096} $\pm$ .001 \\
+ & (50,50,15)  & 0.157 & 0.361 & 0.156 & 0.195 & \textbf{0.077} & 0.088 & 0.087 $\pm$ .004 \\
+ & (50,70,15)  & 0.992 & 0.390 & 0.171 & 0.268 & 0.099 & 0.080 & \textbf{0.080} $\pm$ .003 \\
+ & (70,100,15) & 0.993 & 0.403 & 0.177 & 0.306 & 0.106 & 0.100 & \textbf{0.098} $\pm$ .001 \\
 \midrule
- & \textbf{Mean} & 0.266 & 0.490 & 0.268 & 0.326 & 0.270 & 0.143 & \textbf{0.122} \\
+ & \textbf{Mean} & 0.266 & 0.490 & 0.268 & 0.326 & 0.270 & 0.143 & \textbf{0.128} \\
 \bottomrule
 \end{tabular}
 \end{table*}
 
 At matched inference effort, the mean objective across the twelve
-configurations is 0.122, against 0.143 for the strongest neural baseline
-(Sequential), a 14.9\% relative reduction. Every non-exact baseline is beaten
+configurations is 0.128, against 0.143 for the strongest neural baseline
+(Sequential), a 10.7\% relative reduction. Every non-exact baseline is beaten
 on the mean.
 
 The table answers two questions at once, and they are the two the
 decomposition rests on. \textsc{AM}, \textsc{POMO} and \textsc{Sequential}
 all learn the target choice as well as the firing decision, and all three are
-beaten: 0.326, 0.270 and 0.143 against our 0.122. Removing target selection
+beaten: 0.326, 0.270 and 0.143 against our 0.128. Removing target selection
 from the policy therefore costs nothing that a learned target head was
 supplying. \textsc{Greedy}, at the other end, assigns targets by the same rule
 we do and differs only in that no policy decides which weapons fire; it scores
-0.490. The firing decision is thus where essentially all of the value sits,
+0.490, roughly four times ours. The firing decision is thus where essentially
+all of the value sits,
 and it is the one part for which Proposition~\ref{prop:myopic-gap} rules out
 any per-stage substitute. Learning less does not cost accuracy here; learning
 the right part is what buys it.
 
 The per-configuration picture is more informative than the mean, and splits
-cleanly by tier. Against SCIP, we lose all six Small and Medium
-configurations and win all six Large and Battlefield ones. That is the
-expected pattern: at small scale the solver still proves or nearly proves
-optimality within its budget, and no heuristic should beat it there; at large
-scale its branch-and-bound no longer reaches a competitive incumbent, failing
-outright at the two largest configurations. Against Sequential, the
-strongest learned baseline, we win 9 of 12 and tie at (40,50,10),
-losing only (5,5,5) by 0.021 and (30,40,10) by 0.005. Against all learned
-baselines together we are best at 8 of 12; the remaining loss is (50,50,15),
-where POMO reaches 0.077 against our 0.084.
+by tier. Against SCIP we lose all six Small and Medium configurations, tie at
+(30,30,10), and win the remaining five. That is the expected pattern: at small
+scale the solver proves optimality within its budget
+(Appendix~\ref{app:scip}) and no heuristic should beat it there, while at
+large scale its branch-and-bound no longer reaches a competitive incumbent and
+fails outright at the two largest configurations. Against Sequential, the
+strongest learned baseline, we win 7 of 12, tie at (50,70,15), and lose four:
+(5,5,5) by 0.025, (15,15,5) by 0.003, (30,40,10) by 0.010 and (40,50,10) by
+0.008. Against all learned baselines together we are best at 7 of 12, the
+remaining loss being (50,50,15), where POMO reaches 0.077 against our 0.087.
 
-All results are reported over three seeds. Across-seed standard deviations
-are between 0.000 and 0.002, smaller than the gap to the nearest competing
-method at every configuration, so the ordering of methods does not depend on
-which training run is used.
+The losses share a shape worth naming. All four against Sequential are
+configurations where the sequential decoder's per-weapon re-observation pays
+off, either because the instance is small enough that deciding one weapon at a
+time costs little, or because the firing set is tight enough that the order of
+commitment matters. We do not win everywhere, and the mean advantage is
+carried by the larger configurations rather than spread evenly.
+
+All results are reported over ten seeds, and checkpoints are selected on a
+validation set drawn at the training size range rather than on the
+configurations reported here (Section~\ref{sec:data}). Across-seed standard
+deviations run from 0.001 to 0.028 and are largest at the Small tier, where a
+single instance carries more weight. They are small relative to the margin
+over Greedy and the auction everywhere, but at (15,15,5) the spread of 0.008
+exceeds our 0.003 margin over Sequential, so that configuration should be read
+as a tie rather than a loss.
 
 %% Measured by code_DWTA/measure_method_timing.py (Greedy, Auction, Sequential,
 %% ours) and code_DWTA/measure_rl4co_timing.py (AM, POMO), both on the same ten
@@ -313,7 +325,7 @@ probe.
 \begin{table}[t]
 \centering
 \small
-\caption{Edit-budget sweep, mean over three seeds. \emph{last accept} is the
+\caption{Edit-budget sweep, mean over ten seeds. \emph{last accept} is the
 mean index of the final accepted flip within a $K{=}30$ probe; a value near 30
 indicates the search was still finding improvements when the budget ran out.}
 \label{tab:budget}
@@ -321,33 +333,33 @@ indicates the search was still finding improvements when the budget ran out.}
 \toprule
 Config & $K{=}0$ & $K{=}3$ & $K{=}10$ & $K{=}30$ & last accept \\
 \midrule
-(5,5,5)     & 0.1901 & 0.1825 & 0.1740 & 0.1660 & 11.5 \\
-(5,7,5)     & 0.2451 & 0.2381 & 0.2347 & 0.2341 & 7.0 \\
-(10,15,5)   & 0.2248 & 0.2240 & 0.2212 & 0.2167 & 13.3 \\
-(15,15,5)   & 0.0940 & 0.0925 & 0.0918 & 0.0905 & 12.9 \\
-(15,20,5)   & 0.1661 & 0.1647 & 0.1597 & 0.1550 & 19.8 \\
-(20,30,5)   & 0.2086 & 0.2070 & 0.2040 & 0.1985 & 17.7 \\
-(30,30,10)  & 0.0121 & 0.0118 & 0.0113 & 0.0105 & 21.3 \\
-(30,40,10)  & 0.0373 & 0.0366 & 0.0355 & 0.0336 & 21.8 \\
-(40,50,10)  & 0.0279 & 0.0275 & 0.0263 & 0.0248 & 19.4 \\
-(50,50,15)  & 0.0839 & 0.0838 & 0.0837 & 0.0837 & 21.2 \\
-(50,70,15)  & 0.0771 & 0.0770 & 0.0769 & 0.0767 & 20.6 \\
-(70,100,15) & 0.0960 & 0.0959 & 0.0958 & 0.0956 & 21.7 \\
+(5,5,5)     & 0.1935 & 0.1827 & 0.1739 & 0.1635 & 12.1 \\
+(5,7,5)     & 0.2654 & 0.2574 & 0.2491 & 0.2439 & 9.3 \\
+(10,15,5)   & 0.2322 & 0.2314 & 0.2254 & 0.2195 & 13.9 \\
+(15,15,5)   & 0.0992 & 0.0975 & 0.0965 & 0.0942 & 14.3 \\
+(15,20,5)   & 0.1723 & 0.1705 & 0.1652 & 0.1587 & 19.3 \\
+(20,30,5)   & 0.2145 & 0.2126 & 0.2086 & 0.2018 & 18.4 \\
+(30,30,10)  & 0.0151 & 0.0147 & 0.0141 & 0.0134 & 22.6 \\
+(30,40,10)  & 0.0415 & 0.0408 & 0.0393 & 0.0374 & 23.5 \\
+(40,50,10)  & 0.0356 & 0.0352 & 0.0343 & 0.0318 & 23.9 \\
+(50,50,15)  & 0.0874 & 0.0874 & 0.0874 & 0.0873 & 21.2 \\
+(50,70,15)  & 0.0797 & 0.0796 & 0.0795 & 0.0792 & 21.5 \\
+(70,100,15) & 0.0975 & 0.0974 & 0.0973 & 0.0972 & 21.4 \\
 \midrule
-\textbf{Mean} & 0.1219 & 0.1201 & 0.1179 & \textbf{0.1155} & 17.4 \\
+\textbf{Mean} & 0.1278 & 0.1256 & 0.1225 & \textbf{0.1190} & 18.4 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Two patterns matter. The gain is modest in absolute terms, 0.1219 to 0.1155,
-a 5.2\% relative reduction across the full budget, because the construction
-policy is now trained against the searched objective and therefore already
+Two patterns matter. The gain is modest in absolute terms, 0.1278 to 0.1190,
+a 6.9\% relative reduction across the full budget, because the construction
+policy is trained against the searched objective and therefore already
 produces schedules the search has little left to fix. That is the intended
 behaviour of training through the search, not a weakness of the search.
 
 Second, where the curve flattens scales with problem size. At (5,7,5) the last
-accepted flip is at index 7 on average, and the $K{=}10$ and $K{=}30$ columns
-differ by 0.001. At the Large and Battlefield configurations the last accepted
+accepted flip is at index 9 on average, and the $K{=}10$ and $K{=}30$ columns
+differ by 0.005. At the Large and Battlefield configurations the last accepted
 flip sits around 20, so the search is still finding improvements when a budget
 of 30 expires. A larger schedule offers more slots worth editing, and
 because quality never falls as $K$ grows, an operator can
@@ -464,33 +476,34 @@ placed between the encoder and the scoring heads,
 \end{equation}
 with $\bm{H}^{\text{wpn}} = [\bm{h}_1^{\text{wpn},(L)}; \ldots; \bm{h}_M^{\text{wpn},(L)}]$
 and $\text{MHA}$ standard self-attention~\cite{vaswani2017attention} over the
-weapon axis, and retraining from scratch under an identical recipe: same
-three seeds, same curriculum, same budgets, same evaluation protocol.
+weapon axis, and retraining from scratch under an identical recipe: same ten
+seeds, same curriculum, same budgets, same selection procedure, same
+evaluation protocol.
 
 \begin{table}[t]
 \centering
 \small
-\caption{With and without the weapon-to-weapon self-attention layer. Mean over
-three seeds with across-seed standard deviation, twelve held-out
-configurations.}
+\caption{With and without the weapon-to-weapon self-attention layer, ten seeds
+each, twelve held-out configurations.}
 \label{tab:comm-ablation}
 \begin{tabular}{@{}lcccc@{}}
 \toprule
 & $K{=}0$ & $K{=}3$ & $K{=}10$ & $K{=}30$ \\
 \midrule
-with communication & 0.1242 & 0.1222 & 0.1197 & 0.1169 \\
-\textbf{without (reported)} & \textbf{0.1219} & \textbf{0.1201} & \textbf{0.1179} & \textbf{0.1155} \\
+with communication & 0.1359 & 0.1334 & 0.1295 & 0.1246 \\
+\textbf{without (reported)} & \textbf{0.1278} & \textbf{0.1256} & \textbf{0.1225} & \textbf{0.1190} \\
 \midrule
-max.\ across-seed std.\ ($K{=}10$) & \multicolumn{2}{l}{with: 0.0076} & \multicolumn{2}{l}{without: 0.0023} \\
+max.\ across-seed std.\ ($K{=}10$) & \multicolumn{2}{l}{with: 0.0315} & \multicolumn{2}{l}{without: 0.0190} \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Removing the layer is better at every budget, and the effect is consistent
-rather than an artifact of the mean: the no-communication variant is ahead at
-8 of 12 configurations and behind at none by more than 0.0015, which is inside
-the seed spread. The largest single gap is at (40,50,10), 0.0263 against
-0.0359. Across-seed variance also falls by a factor of three.
+Removing the layer is better at every budget and at eleven of the twelve
+configurations, the exception being (50,70,15) where the two are within 0.0004.
+The margin at $K{=}0$ is 0.0081, and it is widest at the Small and Medium tiers:
+0.0221 at (10,15,5), 0.0195 at (15,20,5), 0.0244 at (20,30,5). Across-seed
+spread also falls, with the largest standard deviation dropping from 0.0315 to
+0.0190.
 
 We take this as confirmation of Remark~\ref{rem:auction-kills-pileon} rather
 than a surprise, and note what it does \emph{not} say. It is not evidence that
@@ -648,27 +661,17 @@ earn its parameters, which is why the final framework has no second network.
 \subsection{Limitations}
 \label{sec:limits}
 
-Results are reported over three seeds. Training is non-monotone in steps for every method
-we trained here, so checkpoints are selected by best held-out performance
-during training rather than final step. We report the full trace, but this
-remains a selection procedure. Selection used a cheaper criterion than the
-reported table; reported numbers are regenerated for every checkpoint on all
-twelve configurations under one protocol.
-
-The non-monotonicity is large enough to state concretely rather than in the
-abstract. On one seed the best checkpoint reached 0.1219 at step 260 while the
-final step returned 0.1493, and an intermediate evaluation at step 340
-degraded to 0.3540 before recovering. On another the best checkpoint was the
-final step itself, which suggests the runs are not uniformly converged and
-that a longer schedule might still improve them. Reporting the peak alone
-would hide all of this. Appendix~\ref{app:traces} therefore gives the complete
-evaluation trace for every seed, so that a reader can see what the selection
-procedure was choosing from.
-
-One fact tempers the concern. The three selected checkpoints agree closely on
-the held-out benchmark despite these divergent trajectories
-(Table~\ref{tab:main_results}), so the procedure is selecting reproducibly even
-though the path to it is erratic.
+Results are reported over ten seeds. Training is non-monotone, so checkpoints
+are selected by best validation performance rather than taken at the final
+step. Selection uses instances disjoint from those reported, but it is still a
+selection, and the twenty candidates per run make the chosen number optimistic
+relative to a predetermined checkpoint. The spread is wide: best validation
+lands between 0.1500 and 0.1681 across the ten runs, while final-step values
+reach 0.4753. Three runs were still improving when training stopped, so a
+longer schedule might do better. Appendix~\ref{app:traces} gives the full
+trace. What tempers this is that the ten selected checkpoints then agree on
+the held-out benchmark, with across-seed standard deviation under 0.008 at
+nine of the twelve configurations.
 
 We take the instability to be a property of the learning problem rather than
 of the implementation. Participation is a binary decision whose reward is

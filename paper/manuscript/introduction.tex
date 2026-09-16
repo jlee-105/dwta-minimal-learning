@@ -100,7 +100,7 @@ run.
 
 \item \textbf{Learning strictly less, and performing better}: The policy
 outputs one Bernoulli parameter per weapon per stage, not a target
-distribution. This reduces the mean objective by 14.9\% across twelve
+distribution. This reduces the mean objective by 10.7\% across twelve
 configurations relative to the strongest baseline that learns both decisions,
 and outperforms every richer alternative we trained.
 
@@ -109,8 +109,8 @@ weapons are decided in a single pass. The assignment guarantee holds for any
 firing set, including one produced by weapons deciding independently
 (Remark~\ref{rem:auction-kills-pileon}), so the contention that communication
 layers and conflict handlers exist to resolve never arises. Adding
-weapon-to-weapon attention under an identical recipe makes the pipeline
-slightly worse and three times less stable across seeds
+weapon-to-weapon attention under an identical recipe makes the pipeline worse
+at eleven of twelve configurations and less stable across seeds
 (Section~\ref{sec:ablation}).
 
 \item \textbf{A provably safe improvement step}: At inference we flip

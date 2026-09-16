@@ -102,53 +102,49 @@ does not, and Table~\ref{tab:scip} marks where that region begins.
 \section{Evaluation traces}
 \label{app:traces}
 
-Table~\ref{tab:traces} gives every held-out evaluation recorded during
-training, for all three seeds. It is included because the checkpoint reported
-in Section~\ref{sec:results} is selected by best held-out performance rather
+Table~\ref{tab:traces} gives every validation evaluation recorded during
+training, for all ten seeds. It is included because the checkpoint reported in
+Section~\ref{sec:results} is selected by best validation performance rather
 than taken at the final step, and a reader is entitled to see what that
-selection was choosing among.
+selection was choosing among. Validation instances are drawn at the training
+size range under a seed used nowhere else, so none of the twelve reported
+configurations appears here.
 
-\begin{table}[htbp]
+\begin{table*}[htbp]
 \centering
-\small
-\caption{Held-out objective at every evaluation during training. Seeds 5 and 6
-were evaluated on all twelve configurations at $K{=}10$. Seed 7 used a cheaper
-in-training criterion, one configuration per tier at $K{=}3$, so its column
-is \emph{not} on the same scale as the other two and should be read only for
-the shape of its trajectory. All three selected checkpoints are re-evaluated on
-the identical twelve-configuration protocol for Table~\ref{tab:main_results}.}
+\scriptsize
+\caption{Validation objective at every evaluation during training, ten seeds,
+$K{=}10$. Lower is better. Training is non-monotone: the best value for a run
+is often far from its last, and three runs were still improving when the
+schedule ended.}
 \label{tab:traces}
-\begin{tabular}{@{}lccc@{}}
+\begin{tabular}{@{}lcccccccccc@{}}
 \toprule
-Step & seed 5 ($K{=}10$, 12 cfg) & seed 6 ($K{=}10$, 12 cfg) & seed 7 ($K{=}3$, 4 cfg) \\
+Step & s1 & s2 & s3 & s4 & s5 & s6 & s7 & s8 & s9 & s10 \\
 \midrule
-20  & 0.1780 & 0.4260 & 0.4626 \\
-40  & 0.4603 & 0.4895 & 0.1631 \\
-60  & 0.3409 & 0.4867 & 0.3128 \\
-80  & 0.1463 & 0.1646 & 0.2395 \\
-100 & 0.1633 & 0.2150 & 0.2677 \\
-120 & 0.1531 & 0.1590 & 0.1705 \\
-140 & 0.1957 & 0.1579 & 0.1677 \\
-160 & 0.1668 & 0.1558 & 0.1606 \\
-180 & 0.1469 & 0.2242 & 0.2386 \\
-200 & 0.1490 & 0.1543 & 0.1594 \\
-220 & 0.1432 & 0.1237 & 0.1739 \\
-240 & 0.1297 & 0.1214 & 0.2881 \\
-260 & \textbf{0.1219} & 0.2896 & 0.2477 \\
-280 & 0.1485 & 0.1240 & 0.1670 \\
-300 & 0.1397 & 0.1273 & 0.1598 \\
-320 & 0.1416 & 0.1934 & 0.1332 \\
-340 & 0.3540 & 0.2115 & \textbf{0.1292} \\
-360 & 0.1383 & 0.2038 & 0.3013 \\
-380 & 0.1446 & 0.1343 & 0.2472 \\
-400 & 0.1493 & \textbf{0.1185} & 0.2113 \\
-\midrule
-best (step)  & 0.1219 (260) & 0.1185 (400) & 0.1292 (340) \\
-final step   & 0.1493 & 0.1185 & 0.2113 \\
-worst        & 0.4603 & 0.4895 & 0.4626 \\
+20 & 0.1689 & 0.1926 & 0.2001 & 0.5163 & 0.2148 & 0.2117 & 0.5393 & 0.2005 & 0.2642 & 0.1936 \\
+40 & 0.1962 & 0.4990 & 0.2070 & 0.2163 & 0.1651 & 0.1941 & 0.2239 & 0.1731 & 0.1827 & 0.1533 \\
+60 & 0.1859 & 0.2108 & 0.1643 & 0.2063 & 0.2744 & 0.1926 & 0.3947 & 0.2376 & 0.5401 & 0.3128 \\
+80 & 0.2233 & 0.1777 & 0.3230 & 0.2005 & 0.2219 & 0.1820 & 0.2461 & 0.2258 & 0.1693 & 0.2685 \\
+100 & 0.4949 & 0.3198 & 0.3205 & 0.1605 & 0.1942 & 0.2343 & 0.4087 & 0.3273 & 0.1623 & 0.2495 \\
+120 & 0.2907 & 0.3715 & 0.3540 & 0.1745 & 0.2057 & 0.2122 & 0.2220 & 0.1597 & 0.2053 & 0.1866 \\
+140 & 0.3997 & 0.1589 & 0.3254 & 0.5385 & 0.4319 & 0.3201 & 0.1535 & 0.1841 & 0.2330 & 0.2476 \\
+160 & 0.1985 & 0.1603 & 0.2009 & 0.1729 & 0.2949 & 0.1681 & 0.1808 & 0.1672 & 0.2106 & 0.3447 \\
+180 & 0.2316 & 0.2267 & 0.2281 & 0.1686 & 0.2193 & 0.4487 & 0.1500 & 0.3925 & 0.1797 & 0.3311 \\
+200 & 0.2345 & 0.2300 & 0.2257 & 0.3212 & 0.1657 & 0.5255 & 0.3614 & 0.2551 & 0.2838 & 0.3320 \\
+220 & 0.2873 & 0.2401 & 0.2989 & 0.1683 & 0.1836 & 0.4038 & 0.4939 & 0.1543 & 0.1565 & 0.3077 \\
+240 & 0.1620 & 0.2314 & 0.2977 & 0.1783 & 0.1667 & 0.2641 & 0.3511 & 0.1954 & 0.3624 & 0.2158 \\
+260 & 0.1577 & 0.1569 & 0.3008 & 0.3472 & 0.1644 & 0.2492 & 0.4326 & 0.1817 & 0.2223 & 0.4469 \\
+280 & 0.1696 & 0.1549 & 0.1906 & 0.3356 & 0.1711 & 0.2826 & 0.2985 & 0.2777 & 0.2271 & 0.1723 \\
+300 & 0.2922 & 0.1563 & 0.1695 & 0.2069 & 0.2684 & 0.3456 & 0.1563 & 0.4015 & 0.1586 & 0.3113 \\
+320 & 0.2925 & 0.2251 & 0.1536 & 0.1607 & 0.2973 & 0.4161 & 0.1556 & 0.1960 & 0.1862 & 0.1901 \\
+340 & 0.3298 & 0.1775 & 0.5183 & 0.2338 & 0.1831 & 0.1836 & 0.2254 & 0.1711 & 0.2238 & 0.2620 \\
+360 & 0.2250 & 0.3286 & 0.3104 & 0.1637 & 0.4682 & 0.2017 & 0.2298 & 0.1599 & 0.1701 & 0.3388 \\
+380 & 0.2052 & 0.1531 & 0.2925 & 0.1526 & 0.1847 & 0.2530 & 0.1789 & 0.1797 & 0.3208 & 0.2603 \\
+400 & 0.1546 & 0.2975 & 0.1797 & 0.3017 & 0.1595 & 0.2840 & 0.3386 & 0.1510 & 0.4753 & 0.1561 \\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{table*}
 
 Three observations, none of them flattering, all of them relevant to how the
 reported numbers should be read.

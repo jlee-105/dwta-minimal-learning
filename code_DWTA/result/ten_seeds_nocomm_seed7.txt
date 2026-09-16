@@ -1,0 +1,110 @@
+Using CUDA GPU
+[OK] All hyperparameters validated successfully!
+   Problem size: 5W x 5T, MAX_TIME=5
+   Model: EMBEDDING_DIM=128, HEAD_NUM=8
+   Training: 200 epochs, 5 episodes/epoch
+arch=nocomm | 1307778 parameters
+step    5 | loss   1.0930 | pre 0.5387 -> post 0.5387 | 35s
+step   10 | loss  -0.1222 | pre 0.2384 -> post 0.2372 | 72s
+step   15 | loss   0.6567 | pre 0.3988 -> post 0.3961 | 108s
+step   20 | loss  -0.2846 | pre 0.2063 -> post 0.2043 | 150s
+VAL  step   20 | held-out @ train scale, K=10: 0.5393  <-- best, saved
+step   25 | loss  -0.6788 | pre 0.1656 -> post 0.1529 | 192s
+step   30 | loss   0.1903 | pre 0.2316 -> post 0.2310 | 229s
+step   35 | loss   0.3986 | pre 0.1822 -> post 0.1812 | 274s
+step   40 | loss  -0.7222 | pre 0.2379 -> post 0.2365 | 310s
+VAL  step   40 | held-out @ train scale, K=10: 0.2239  <-- best, saved
+step   45 | loss  -0.0549 | pre 0.1780 -> post 0.1764 | 354s
+step   50 | loss   0.4203 | pre 0.5222 -> post 0.4164 | 387s
+step   55 | loss   0.1971 | pre 0.0253 -> post 0.0253 | 429s
+step   60 | loss   0.0917 | pre 0.1518 -> post 0.1516 | 465s
+VAL  step   60 | held-out @ train scale, K=10: 0.3947
+step   65 | loss  -0.0091 | pre 0.2094 -> post 0.1789 | 507s
+step   70 | loss  -0.4084 | pre 0.2230 -> post 0.2193 | 542s
+step   75 | loss   0.4961 | pre 0.2088 -> post 0.2073 | 577s
+step   80 | loss  -0.1335 | pre 0.3084 -> post 0.3070 | 615s
+VAL  step   80 | held-out @ train scale, K=10: 0.2461
+step   85 | loss   0.1645 | pre 0.2206 -> post 0.2189 | 650s
+step   90 | loss  -0.1683 | pre 0.2161 -> post 0.2028 | 679s
+step   95 | loss  -0.1010 | pre 0.1682 -> post 0.1681 | 717s
+step  100 | loss  -0.1481 | pre 0.2707 -> post 0.2705 | 756s
+VAL  step  100 | held-out @ train scale, K=10: 0.4087
+step  105 | loss  -0.5494 | pre 0.2305 -> post 0.2278 | 803s
+step  110 | loss   0.3310 | pre 0.2125 -> post 0.2084 | 847s
+step  115 | loss   0.3357 | pre 0.2279 -> post 0.2271 | 880s
+step  120 | loss  -0.5601 | pre 0.1743 -> post 0.1675 | 914s
+VAL  step  120 | held-out @ train scale, K=10: 0.2220  <-- best, saved
+step  125 | loss   0.0967 | pre 0.1959 -> post 0.1909 | 954s
+step  130 | loss   0.1016 | pre 0.1032 -> post 0.1030 | 996s
+step  135 | loss  -0.4536 | pre 0.1683 -> post 0.1680 | 1032s
+step  140 | loss   0.0242 | pre 0.4856 -> post 0.3275 | 1068s
+VAL  step  140 | held-out @ train scale, K=10: 0.1535  <-- best, saved
+step  145 | loss  -0.1246 | pre 0.2490 -> post 0.2484 | 1110s
+step  150 | loss   0.1270 | pre 0.1750 -> post 0.1745 | 1149s
+step  155 | loss  -0.6174 | pre 0.0967 -> post 0.0915 | 1186s
+step  160 | loss  -0.1669 | pre 0.1645 -> post 0.1636 | 1225s
+VAL  step  160 | held-out @ train scale, K=10: 0.1808
+step  165 | loss  -0.1505 | pre 0.0433 -> post 0.0335 | 1268s
+step  170 | loss   0.2522 | pre 0.0542 -> post 0.0448 | 1301s
+step  175 | loss  -0.0785 | pre 0.1466 -> post 0.1462 | 1342s
+step  180 | loss  -0.0082 | pre 0.1553 -> post 0.1471 | 1378s
+VAL  step  180 | held-out @ train scale, K=10: 0.1500  <-- best, saved
+step  185 | loss   0.0990 | pre 0.3528 -> post 0.2349 | 1417s
+step  190 | loss  -0.0312 | pre 0.2212 -> post 0.2070 | 1448s
+step  195 | loss  -0.0498 | pre 0.2188 -> post 0.2163 | 1490s
+step  200 | loss   0.1748 | pre 0.1453 -> post 0.1451 | 1527s
+VAL  step  200 | held-out @ train scale, K=10: 0.3614
+step  205 | loss  -0.0000 | pre 0.1266 -> post 0.1205 | 1571s
+step  210 | loss  -0.0060 | pre 0.1054 -> post 0.1012 | 1611s
+step  215 | loss   0.0000 | pre 0.1917 -> post 0.1915 | 1648s
+step  220 | loss  -0.0001 | pre 0.1425 -> post 0.1425 | 1691s
+VAL  step  220 | held-out @ train scale, K=10: 0.4939
+step  225 | loss   0.0561 | pre 0.2481 -> post 0.2478 | 1736s
+step  230 | loss  -0.1306 | pre 0.3068 -> post 0.2847 | 1773s
+step  235 | loss  -0.4752 | pre 0.0852 -> post 0.0850 | 1814s
+step  240 | loss   0.1427 | pre 0.1633 -> post 0.1607 | 1851s
+VAL  step  240 | held-out @ train scale, K=10: 0.3511
+step  245 | loss  -0.5678 | pre 0.1459 -> post 0.1313 | 1896s
+step  250 | loss  -1.0293 | pre 0.0360 -> post 0.0342 | 1939s
+step  255 | loss  -0.1372 | pre 0.1228 -> post 0.1177 | 1971s
+step  260 | loss   0.3985 | pre 0.3020 -> post 0.3010 | 2010s
+VAL  step  260 | held-out @ train scale, K=10: 0.4326
+step  265 | loss   0.6803 | pre 0.3207 -> post 0.3207 | 2055s
+step  270 | loss  -0.0597 | pre 0.2233 -> post 0.2204 | 2096s
+step  275 | loss  -0.0863 | pre 0.1367 -> post 0.1245 | 2136s
+step  280 | loss  -0.0802 | pre 0.1890 -> post 0.1852 | 2169s
+VAL  step  280 | held-out @ train scale, K=10: 0.2985
+step  285 | loss  -0.0490 | pre 0.1822 -> post 0.1820 | 2221s
+step  290 | loss   0.1591 | pre 0.0696 -> post 0.0652 | 2259s
+step  295 | loss   0.0538 | pre 0.1825 -> post 0.1783 | 2302s
+step  300 | loss  -0.1538 | pre 0.0415 -> post 0.0372 | 2337s
+VAL  step  300 | held-out @ train scale, K=10: 0.1563
+step  305 | loss  -0.2356 | pre 0.1017 -> post 0.0995 | 2380s
+step  310 | loss  -0.0702 | pre 0.0286 -> post 0.0281 | 2423s
+step  315 | loss  -0.0360 | pre 0.2728 -> post 0.2697 | 2462s
+step  320 | loss   0.0576 | pre 0.0445 -> post 0.0417 | 2503s
+VAL  step  320 | held-out @ train scale, K=10: 0.1556
+step  325 | loss  -0.0287 | pre 0.2022 -> post 0.1918 | 2540s
+step  330 | loss  -0.3931 | pre 0.0260 -> post 0.0255 | 2583s
+step  335 | loss   0.0622 | pre 0.0668 -> post 0.0656 | 2622s
+step  340 | loss  -0.1091 | pre 0.0490 -> post 0.0476 | 2661s
+VAL  step  340 | held-out @ train scale, K=10: 0.2254
+step  345 | loss  -0.0957 | pre 0.0591 -> post 0.0549 | 2706s
+step  350 | loss   0.1940 | pre 0.2218 -> post 0.2205 | 2746s
+step  355 | loss   0.0671 | pre 0.2378 -> post 0.2244 | 2788s
+step  360 | loss   0.0460 | pre 0.0888 -> post 0.0854 | 2836s
+VAL  step  360 | held-out @ train scale, K=10: 0.2298
+step  365 | loss   0.0601 | pre 0.1488 -> post 0.1481 | 2880s
+step  370 | loss   0.2077 | pre 0.1084 -> post 0.1079 | 2918s
+step  375 | loss  -0.0935 | pre 0.1894 -> post 0.1387 | 2954s
+step  380 | loss  -0.0625 | pre 0.1367 -> post 0.1264 | 2989s
+VAL  step  380 | held-out @ train scale, K=10: 0.1789
+step  385 | loss   0.0726 | pre 0.0599 -> post 0.0555 | 3026s
+step  390 | loss   0.2823 | pre 0.1331 -> post 0.1319 | 3064s
+step  395 | loss  -0.1625 | pre 0.2491 -> post 0.2475 | 3105s
+step  400 | loss  -0.0001 | pre 0.2033 -> post 0.2031 | 3149s
+VAL  step  400 | held-out @ train scale, K=10: 0.3386
+
+best validation objective: 0.1500
+checkpoint: result/SearchInLoop_seed7_tenseed_nocomm_best.pt
+NOTE: the twelve reported configurations were not used for selection; score this checkpoint with eval_final_table.py.
