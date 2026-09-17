@@ -29,7 +29,7 @@ from scipy.stats import wilcoxon
 from eval_final_table import CONFIGS
 
 CFGS = ["%dM_%dN_%dT" % c for c in CONFIGS]
-BASELINES = ["Greedy", "Auction", "AM", "POMO", "Sequential"]  # SCIP is an exact solver, not a learned baseline; excluded from this test
+BASELINES = ["AM", "POMO", "Sequential"]  # RL baselines only; Greedy/Auction are non-learned heuristics, SCIP is exact
 TIE = 1e-6
 
 

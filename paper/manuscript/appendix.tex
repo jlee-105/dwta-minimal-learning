@@ -186,7 +186,11 @@ Table~\ref{tab:main_results} reports means, and a win or loss there is a
 comparison of two averages, not of matched outcomes. Because every method is
 evaluated on the same 120 instances (the ten seed-123 replications of each of
 the twelve configurations), each instance gives a matched pair, and we test on
-those pairs directly. Our value at an instance is the mean over the ten
+those pairs directly, against the other methods that learn a policy: AM,
+POMO and Sequential. Greedy and Auction are fixed mechanisms with no
+parameters, and SCIP is an exact solver rather than a learned method, so
+neither pairing asks the same question; SCIP's comparison is the tier split
+of Appendix~\ref{app:scip}. Our value at an instance is the mean over the ten
 seeds at $K{=}0$, the same quantity Table~\ref{tab:main_results} reports.
 Differences are baseline minus ours, so a positive value favours ours. Each
 test is a two-sided Wilcoxon signed-rank test; instances where the two
@@ -199,16 +203,12 @@ baseline.
 \small
 \caption{Paired Wilcoxon signed-rank test, ours against each learned baseline,
 over all 120 seed-123 instances. W/L/T counts instances where ours is better,
-worse, or tied. SCIP is an exact solver, not a learned baseline, and is
-excluded here; Appendix~\ref{app:scip} gives the tier-by-tier comparison
-against it.}
+worse, or tied.}
 \label{tab:paired-overall}
 \begin{tabular}{@{}lrrrr@{}}
 \toprule
 Baseline & Mean diff. & W/L/T & $p$ \\
 \midrule
-Greedy      & $+0.365$ & 120/0/0  & $<10^{-4}$ \\
-Auction     & $+0.144$ & 117/3/0  & $<10^{-4}$ \\
 AM          & $+0.153$ & 117/3/0  & $<10^{-4}$ \\
 POMO        & $+0.146$ & 108/12/0 & $<10^{-4}$ \\
 Sequential  & $+0.019$ & 79/41/0  & 0.0004 \\
@@ -249,16 +249,16 @@ Config & Mean diff. & W/L/T & $p$ (Holm) \\
 \end{tabular}
 \end{table}
 
-Against every learned baseline other than Sequential, the advantage is
-significant overall and at every configuration except two single-configuration
-ties with POMO, (50,50,15) and (70,100,15), where POMO's own advantage there
+Against AM the advantage is significant overall and at every configuration.
+Against POMO it is significant overall and at every configuration except two,
+(50,50,15) and (70,100,15), where POMO's own advantage there
 (Table~\ref{tab:main_results}) is likewise not significant.
 
 As a robustness check, the overall test against each baseline was repeated
-ten times, once per seed in place of the ten-seed mean. Against Greedy,
-Auction, AM and POMO every seed alone is significant at $p<10^{-4}$. Against
-Sequential every seed alone is significant, with $p$ between 0.0001 and
-0.0011, so the conclusion does not depend on averaging across seeds.
+ten times, once per seed in place of the ten-seed mean. Against AM and POMO
+every seed alone is significant at $p<10^{-4}$. Against Sequential every seed
+alone is significant, with $p$ between 0.0001 and 0.0011, so the conclusion
+does not depend on averaging across seeds.
 
 Code and raw values: \texttt{code\_DWTA/paired\_collect.py},
 \texttt{paired\_collect\_rl4co.py}, and \texttt{paired\_stats.py}; output in

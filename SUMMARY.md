@@ -319,7 +319,7 @@ A simulated hostile review (Reviewer 1) was worked through point by point.
 | 3.5 scalar fire-logit | Done and adopted as the reported model: 0.1245 vs 0.1278 (edge head), lower std. New ablation subsection; method.tex now defines the scalar head |
 | 3.6 runtime accounting | Timing caption now states what is measured and that ours is K=0 |
 | 3.7 SCIP optimality | Appendix added: closes 26/30 Small instances, almost nothing above (15,15,5) |
-| 3.8 paired tests | Done, against the learned baselines (SCIP is an exact solver, not included). Paired Wilcoxon on all 120 instances: significant vs Greedy/Auction/AM/POMO (p<1e-4) and vs Sequential (79/41, p=0.0004). Appendix~F |
+| 3.8 paired tests | Done, against AM/POMO/Sequential only. Greedy/Auction margins are large enough not to need a test; SCIP is an exact solver and gets the tier split instead. Paired Wilcoxon on all 120 instances: significant vs AM/POMO (p<1e-4) and vs Sequential (79/41, p=0.0004). Appendix~F |
 
 Still open and deliberate:
 
