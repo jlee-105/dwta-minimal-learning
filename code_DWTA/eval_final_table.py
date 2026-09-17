@@ -26,6 +26,7 @@ sys.path.append("rl")
 from common.TORCH_OBJECTS import DEVICE
 from common.DWTA_GNN_comm_sinkhorn import create_gnn_actor_comm_sinkhorn
 from common.DWTA_GNN import create_gnn_actor as create_gnn_actor_nocomm
+from common.DWTA_GNN_firelogit import create_gnn_actor_firelogit
 from common.Dynamic_Instance_generation import input_generation
 from common.temporal_dilemma_generator_moderate import generate_moderate_temporal_instance
 from eval_tiered_benchmark import patch_globals
@@ -83,7 +84,9 @@ def curve_for_instance(actor, ae, wtp, nw, nt, mt, kmax, rng):
 
 
 def eval_ckpt(path, kmax, arch="comm"):
-    mk = create_gnn_actor_comm_sinkhorn if arch == "comm" else create_gnn_actor_nocomm
+    mk = {"comm": create_gnn_actor_comm_sinkhorn,
+          "nocomm": create_gnn_actor_nocomm,
+          "firelogit": create_gnn_actor_firelogit}[arch]
     actor = mk().to(DEVICE)
     actor.load_state_dict(torch.load(path, map_location=DEVICE, weights_only=False))
     actor.eval()
@@ -113,7 +116,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--ckpts", nargs="+", required=True)
     ap.add_argument("--kmax", type=int, default=30)
-    ap.add_argument("--arch", choices=["comm", "nocomm"], default="comm")
+    ap.add_argument("--arch", choices=["comm", "nocomm", "firelogit"], default="comm")
     args = ap.parse_args()
 
     all_runs = []

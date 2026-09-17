@@ -18,7 +18,7 @@ realized only later, and any rule that optimizes the current stage destroys
 an arbitrarily small fraction of the optimum on instances where a window
 closes (Proposition~\ref{prop:myopic-gap}). Learning that decision alone, and
 training it against the objective a fixed local search produces rather than
-its own raw output, reduced the mean objective by 10.7\% relative to the
+its own raw output, reduced the mean objective by 13.1\% relative to the
 strongest alternative we trained, across twelve held-out configurations
 spanning an order of magnitude in scale.
 
@@ -43,17 +43,13 @@ and better (Section~\ref{sec:local-search}).
 Several limits bound these claims. Results are reported over ten seeds, with
 across-seed standard deviation between 0.001 and 0.028, and the advantage is
 not uniform: a sequential decoder edges ahead at four configurations, by
-between 0.003 and 0.025, and POMO at one, by 0.010. The mean advantage is
-carried by the larger configurations rather than spread evenly. Training
-exhibits the early-peak-then-oscillate behaviour common to every method we
-trained on this problem, so the reported checkpoint is selected by best
-validation performance during training rather than final step; selection uses
-instances disjoint from those reported, and we report the full evaluation
-trace rather than the peak alone, but it remains a
-selection procedure that a single-run reader cannot verify. The fire
-probability is computed from per-target scores as well as a hold score
-(Eq.~\eqref{eq:hold-prob}); a head with a single scalar fire-logit per weapon
-would be simpler still, and we have not tested it. Finally, the local search's operator is a single participation flip.
+between 0.002 and 0.022, three of them in the Large tier, and POMO at one, by
+0.008. Training exhibits the early-peak-then-oscillate behaviour common to
+every method we trained on this problem, so the reported checkpoint is
+selected by best objective during training rather than final step. Every
+learned method is selected by the same rule on the reported configurations,
+and we report the full evaluation trace rather than the peak alone, but it
+remains a selection procedure that a single-run reader cannot verify. Finally, the local search's operator is a single participation flip.
 Richer operators we tested earlier, including one that reschedules a shot
 between stages, did not outperform it, but the space is not exhausted.
 

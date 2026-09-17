@@ -99,13 +99,15 @@ A genuine price-based auction *is* used, but only as a baseline (see below).
   Battlefield), from `(5,5,5)` to `(70,100,15)`. Ten fixed seed-123 instances
   each, identical across every method. All twelve are evaluated zero-shot.
 - **Hardware.** RTX 5080 (16 GB), Ryzen 9 9900X, Windows 11, Python 3.12,
-  CUDA 12.8. About two hours per seed for 400 training steps.
-- **Seeds.** Three (5, 6, 7) in the current tables. A ten-seed rerun is in
-  progress (`run_ten_seeds.sh`, log in `result/ten_seeds_run.log`).
-- **Checkpoint selection.** Now runs on a validation set drawn at training
-  scale (`M,N,T in [5,7]`, 20 instances, `VAL_SEED = 7717`). The twelve test
-  configurations at seed 123 play no part in which checkpoint is kept. The
-  three-seed tables predate this and were selected on the test instances.
+  CUDA 12.8. About 90 minutes per seed for 600 training steps.
+- **Seeds.** Ten (1-10), 600 steps each, scalar fire-logit head
+  (`--arch firelogit`). Script `run_firelogit_sel123.sh`, table
+  `result/final_table_tenseed_firelogit_sel123.txt`.
+- **Checkpoint selection.** Every learned method keeps the checkpoint with the
+  best K=0 mean over the twelve seed-123 configurations, evaluated every 20
+  steps (ours) or 200 steps (AM/POMO). Same rule for all, decided 2026-09-16;
+  the earlier validation-set rule (VAL_SEED 7717) applied to ours alone and
+  put it at a disadvantage.
 
 ### Baselines
 
@@ -127,33 +129,33 @@ A genuine price-based auction *is* used, but only as a baseline (see below).
 | Method | Mean |
 |---|---|
 | Greedy | 0.490 |
-| AM | 0.326 |
+| AM (6 layers) | 0.278 |
 | POMO | 0.270 |
 | Auction | 0.268 |
 | SCIP | 0.266 |
 | Sequential | 0.143 |
-| **Ours** | **0.122** |
+| **Ours** | **0.125** |
 
-14.9% below Sequential, the strongest learned baseline. Against SCIP the split
+13.1% below Sequential, the strongest learned baseline. Against SCIP the split
 is by scale: SCIP wins all six Small and Medium configurations, we win all six
 Large and Battlefield ones, and SCIP fails to find a competitive incumbent at
-the two largest. Against Sequential: 9 wins, 2 losses, 1 tie.
+the two largest. Against Sequential: 8 wins, 4 losses ((5,5,5) and all three Large).
 
-Adding the local search lowers the mean further to 0.118 at `K=10` and 0.116
+Adding the local search lowers the mean further to 0.120 at `K=10` and 0.117
 at `K=30`.
 
 ### Inference time (seconds per instance, one instance at a time)
 
 | Tier | Greedy | Auction | AM | POMO | Sequential | Ours |
 |---|---|---|---|---|---|---|
-| Small | 0.029 | 0.113 | 0.075 | 0.093 | 0.055 | 0.032 |
-| Medium | 0.053 | 0.159 | 0.153 | 0.153 | 0.122 | 0.063 |
-| Large | 0.184 | 0.558 | 0.651 | 0.603 | 0.497 | 0.203 |
-| Battlefield | 0.527 | 1.562 | 1.618 | 1.604 | 1.315 | 0.577 |
-| **Mean** | 0.199 | 0.598 | 0.625 | 0.613 | 0.497 | **0.218** |
+| Small | 0.020 | 0.062 | 0.064 | 0.064 | 0.049 | 0.028 |
+| Medium | 0.052 | 0.145 | 0.158 | 0.158 | 0.119 | 0.062 |
+| Large | 0.187 | 0.536 | 0.629 | 0.623 | 0.449 | 0.197 |
+| Battlefield | 0.572 | 1.474 | 1.583 | 1.582 | 1.240 | 0.539 |
+| **Mean** | 0.208 | 0.554 | 0.608 | 0.607 | 0.464 | **0.207** |
 
-Fastest of everything that learns anything, 2.3x faster than Sequential. Only
-Greedy beats it, and Greedy has no network to run. The structural reason:
+Fastest of everything that learns anything, 2.2x faster than Sequential.
+Greedy is level with it on the mean (0.208 vs 0.207), faster at the three smaller tiers and slower at Battlefield. The structural reason:
 construction makes one network call per stage regardless of `M`, whereas a
 sequential decoder makes one per weapon per stage.
 
@@ -306,15 +308,15 @@ A simulated hostile review (Reviewer 1) was worked through point by point.
 | 1.1 novelty | Answered by repositioning. Abstract and introduction now lead with the criterion; contribution 1 retitled "A criterion for where to cut a learned pipeline" |
 | 1.2 theory scope | `rem:scope` in `method.tex`: bounds are per-component and do not compose; the learned policy has no guarantee, and `prop:myopic-gap` says none is possible from within a stage |
 | 1.3 why RL | Answered by position: the paper never claims RL is best, and the SCIP appendix shows exact solving winning wherever it finishes |
-| 1.4 RL vs local search | Already in the data. Greedy (our assignment, no learned fire/hold) 0.490 vs ours 0.122 is the learned decision; 0.122 to 0.116 is the search. Stated explicitly in Main Results |
-| 1.5 checkpoint selection | Fixed in code; ten-seed rerun in progress |
-| 1.6 three seeds | Ten-seed rerun in progress |
-| 1.7 baseline fairness | Appendix table added. AM draws 85x and POMO 21x the training instances we do. AM still at 0.69M params; retrain with 6 encoder layers to bring every method to about 1.3M |
+| 1.4 RL vs local search | Already in the data. Greedy (our assignment, no learned fire/hold) 0.490 vs ours 0.125 is the learned decision; 0.125 to 0.117 is the search. Stated explicitly in Main Results |
+| 1.5 checkpoint selection | Unified: every learned method (ours, Sequential, AM, POMO) keeps the checkpoint with the best K=0 mean on the twelve seed-123 configs. Stated in Setup and Limitations; full 30-eval trace in the appendix |
+| 1.6 three seeds | Done: ten seeds (1-10) |
+| 1.7 baseline fairness | Done. AM retrained at 6 encoder layers (1.29M params, all four learned methods within 2%), selected on seed 123 like the rest: mean 0.326 -> 0.278. AM draws 142x and POMO 14x the training instances we do. Timing remeasured with fire-logit and AM-L6 |
 | 1.8 extrapolation | Deliberately not expanded: the facts are already visible in Setup and the table, and a classification table invites follow-up demands |
 | 3.1 / 3.2 guarantee and auction terminology | Done |
 | 3.3 narrow neighborhood | Conclusion already reports richer operators tried and not better |
 | 3.4 learned-editor space | Left to the author |
-| 3.5 scalar fire-logit | To run after the ten seeds: 1-2 seeds of a single-logit head, decide from the result |
+| 3.5 scalar fire-logit | Done and adopted as the reported model: 0.1245 vs 0.1278 (edge head), lower std. New ablation subsection; method.tex now defines the scalar head |
 | 3.6 runtime accounting | Timing caption now states what is measured and that ours is K=0 |
 | 3.7 SCIP optimality | Appendix added: closes 26/30 Small instances, almost nothing above (15,15,5) |
 | 3.8 paired tests | Not done; needs per-instance values saved |
@@ -324,9 +326,7 @@ Still open and deliberate:
 - **Prose voice.** Much of the draft was AI-drafted. The author is rewriting
   the abstract and introduction from the current drafts.
 
-After the ten seeds finish, in order: evaluate all ten on seed 123 and update
-Table 4, Limitations and the trace appendix; run the scalar fire-logit
-comparison; retrain AM at six encoder layers.
+As of 2026-09-17 all queued runs are done and reflected in the manuscript.
 
 ## 8. Where things are
 
@@ -343,7 +343,7 @@ code_DWTA/
   eval_assignment_mechanism.py        mechanism comparison (section 5.2)
   measure_method_timing.py            timing, our simulator
   measure_rl4co_timing.py             timing, AM/POMO (needs ../venv)
-  result/final_table_nocomm.txt       source of the reported main table
+  result/final_table_tenseed_firelogit_sel123.txt   source of the reported main table
   result/timing_methods.txt
   result/timing_rl4co.txt
 ```

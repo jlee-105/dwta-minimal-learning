@@ -1,0 +1,25 @@
+Using CUDA GPU
+[OK] All hyperparameters validated successfully!
+   Problem size: 5W x 5T, MAX_TIME=5
+   Model: EMBEDDING_DIM=128, HEAD_NUM=8
+   Training: 200 epochs, 5 episodes/epoch
+config             Greedy    Auction   Sequential   Ours(K=0)
+5M_5N_5T           0.0311     0.1391       0.0556      0.0350
+5M_7N_5T           0.0268     0.1267       0.0461      0.0240
+10M_15N_5T         0.0296     0.0745       0.0646      0.0367
+15M_15N_5T         0.0403     0.1528       0.0958      0.0493
+15M_20N_5T         0.0458     0.1294       0.1024      0.0539
+20M_30N_5T         0.0725     0.1956       0.1681      0.0846
+30M_30N_10T        0.1420     0.4647       0.3879      0.1591
+30M_40N_10T        0.1651     0.5108       0.4854      0.1800
+40M_50N_10T        0.2460     0.6975       0.6184      0.2690
+50M_50N_15T        0.3320     1.2683       0.9192      0.3648
+50M_70N_15T        0.4376     1.2579       1.0575      0.5375
+70M_100N_15T       0.8126     2.1597       1.9675      0.8271
+
+tier               Greedy    Auction   Sequential   Ours(K=0)
+Small              0.0292     0.1134       0.0554      0.0319
+Medium             0.0529     0.1593       0.1221      0.0626
+Large              0.1844     0.5576       0.4972      0.2027
+Battlefield        0.5274     1.5620       1.3147      0.5765
+MEAN               0.1985     0.5981       0.4974      0.2184

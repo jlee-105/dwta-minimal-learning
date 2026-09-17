@@ -1,0 +1,160 @@
+Using CUDA GPU
+[OK] All hyperparameters validated successfully!
+   Problem size: 5W x 5T, MAX_TIME=5
+   Model: EMBEDDING_DIM=128, HEAD_NUM=8
+   Training: 200 epochs, 5 episodes/epoch
+arch=firelogit | 1274113 parameters
+step    5 | loss  -0.1127 | pre 0.2622 -> post 0.2588 | 34s
+step   10 | loss   0.4021 | pre 0.3768 -> post 0.3687 | 66s
+step   15 | loss   0.3930 | pre 0.1928 -> post 0.1562 | 92s
+step   20 | loss   0.4032 | pre 0.1726 -> post 0.1697 | 131s
+VAL  step   20 | twelve configs @ seed 123, K=0: 0.1953  <-- best, saved
+step   25 | loss  -0.1559 | pre 0.2517 -> post 0.2483 | 196s
+step   30 | loss   1.1081 | pre 0.4546 -> post 0.4543 | 237s
+step   35 | loss   0.3266 | pre 0.1283 -> post 0.1106 | 276s
+step   40 | loss  -0.4697 | pre 0.2437 -> post 0.2349 | 308s
+VAL  step   40 | twelve configs @ seed 123, K=0: 0.1930  <-- best, saved
+step   45 | loss   0.0622 | pre 0.1495 -> post 0.1400 | 376s
+step   50 | loss  -0.5622 | pre 0.1194 -> post 0.1191 | 411s
+step   55 | loss  -0.0264 | pre 0.1916 -> post 0.1912 | 445s
+step   60 | loss  -0.0316 | pre 0.3895 -> post 0.3894 | 481s
+VAL  step   60 | twelve configs @ seed 123, K=0: 0.3945
+step   65 | loss  -0.6736 | pre 0.2408 -> post 0.2402 | 550s
+step   70 | loss  -0.3687 | pre 0.2766 -> post 0.2671 | 586s
+step   75 | loss   0.0173 | pre 0.2367 -> post 0.2200 | 618s
+step   80 | loss  -0.2821 | pre 0.1660 -> post 0.1557 | 650s
+VAL  step   80 | twelve configs @ seed 123, K=0: 0.1902  <-- best, saved
+step   85 | loss  -0.1856 | pre 0.0572 -> post 0.0560 | 738s
+step   90 | loss  -0.1907 | pre 0.1750 -> post 0.1594 | 779s
+step   95 | loss   0.0151 | pre 0.1338 -> post 0.1091 | 811s
+step  100 | loss   0.0787 | pre 0.3024 -> post 0.3024 | 845s
+VAL  step  100 | twelve configs @ seed 123, K=0: 0.2585
+step  105 | loss  -0.1720 | pre 0.1083 -> post 0.0980 | 909s
+step  110 | loss   0.3263 | pre 0.1167 -> post 0.1142 | 944s
+step  115 | loss  -0.4855 | pre 0.1655 -> post 0.1630 | 975s
+step  120 | loss  -0.1198 | pre 0.1103 -> post 0.1095 | 1013s
+VAL  step  120 | twelve configs @ seed 123, K=0: 0.2188
+step  125 | loss   0.1326 | pre 0.3101 -> post 0.2140 | 1079s
+step  130 | loss   0.3368 | pre 0.5261 -> post 0.3766 | 1101s
+step  135 | loss   0.1329 | pre 0.2545 -> post 0.2492 | 1132s
+step  140 | loss  -0.1915 | pre 0.2081 -> post 0.1941 | 1165s
+VAL  step  140 | twelve configs @ seed 123, K=0: 0.1543  <-- best, saved
+step  145 | loss  -0.7707 | pre 0.1108 -> post 0.1066 | 1233s
+step  150 | loss  -0.4766 | pre 0.1359 -> post 0.1321 | 1273s
+step  155 | loss   0.2652 | pre 0.1305 -> post 0.1235 | 1308s
+step  160 | loss  -0.0585 | pre 0.0976 -> post 0.0907 | 1344s
+VAL  step  160 | twelve configs @ seed 123, K=0: 0.1456  <-- best, saved
+step  165 | loss   0.2179 | pre 0.1013 -> post 0.0811 | 1413s
+step  170 | loss   0.0833 | pre 0.0782 -> post 0.0754 | 1451s
+step  175 | loss  -0.2542 | pre 0.0518 -> post 0.0513 | 1487s
+step  180 | loss  -0.0146 | pre 0.1974 -> post 0.1968 | 1528s
+VAL  step  180 | twelve configs @ seed 123, K=0: 0.1560
+step  185 | loss   0.1998 | pre 0.1593 -> post 0.1589 | 1614s
+step  190 | loss  -0.2524 | pre 0.1669 -> post 0.1650 | 1657s
+step  195 | loss   0.1103 | pre 0.0782 -> post 0.0738 | 1692s
+step  200 | loss   0.1938 | pre 0.3530 -> post 0.3519 | 1728s
+VAL  step  200 | twelve configs @ seed 123, K=0: 0.2401
+step  205 | loss  -0.2951 | pre 0.1195 -> post 0.1131 | 1798s
+step  210 | loss  -0.0507 | pre 0.3070 -> post 0.2926 | 1828s
+step  215 | loss   0.0863 | pre 0.2725 -> post 0.2717 | 1865s
+step  220 | loss  -0.5929 | pre 0.0992 -> post 0.0968 | 1896s
+VAL  step  220 | twelve configs @ seed 123, K=0: 0.1579
+step  225 | loss   0.0358 | pre 0.2708 -> post 0.2629 | 1967s
+step  230 | loss  -0.0883 | pre 0.0173 -> post 0.0165 | 2004s
+step  235 | loss  -0.1664 | pre 0.3755 -> post 0.3747 | 2038s
+step  240 | loss   0.0716 | pre 0.1060 -> post 0.1060 | 2095s
+VAL  step  240 | twelve configs @ seed 123, K=0: 0.2989
+step  245 | loss  -0.1526 | pre 0.0727 -> post 0.0691 | 2162s
+step  250 | loss  -0.2655 | pre 0.0252 -> post 0.0242 | 2203s
+step  255 | loss  -0.5705 | pre 0.0318 -> post 0.0305 | 2237s
+step  260 | loss  -0.3112 | pre 0.2267 -> post 0.2252 | 2279s
+VAL  step  260 | twelve configs @ seed 123, K=0: 0.1382  <-- best, saved
+step  265 | loss  -0.0716 | pre 0.2622 -> post 0.2553 | 2362s
+step  270 | loss  -0.1236 | pre 0.3116 -> post 0.3087 | 2399s
+step  275 | loss   0.0673 | pre 0.0224 -> post 0.0185 | 2433s
+step  280 | loss  -0.3860 | pre 0.0457 -> post 0.0437 | 2469s
+VAL  step  280 | twelve configs @ seed 123, K=0: 0.1563
+step  285 | loss   0.0758 | pre 0.1860 -> post 0.1857 | 2535s
+step  290 | loss   0.0016 | pre 0.3104 -> post 0.3099 | 2567s
+step  295 | loss  -0.4112 | pre 0.2295 -> post 0.2278 | 2601s
+step  300 | loss  -0.2928 | pre 0.0475 -> post 0.0447 | 2631s
+VAL  step  300 | twelve configs @ seed 123, K=0: 0.1513
+step  305 | loss   0.0428 | pre 0.0991 -> post 0.0980 | 2697s
+step  310 | loss   0.1153 | pre 0.2189 -> post 0.2178 | 2738s
+step  315 | loss  -0.1329 | pre 0.2925 -> post 0.2836 | 2777s
+step  320 | loss  -0.4128 | pre 0.1324 -> post 0.1292 | 2817s
+VAL  step  320 | twelve configs @ seed 123, K=0: 0.1234  <-- best, saved
+step  325 | loss  -0.1101 | pre 0.0748 -> post 0.0709 | 2890s
+step  330 | loss   0.1163 | pre 0.1577 -> post 0.1497 | 2928s
+step  335 | loss  -0.1219 | pre 0.2577 -> post 0.2538 | 2979s
+step  340 | loss  -0.1145 | pre 0.1295 -> post 0.1251 | 3011s
+VAL  step  340 | twelve configs @ seed 123, K=0: 0.1229  <-- best, saved
+step  345 | loss   0.0059 | pre 0.0818 -> post 0.0743 | 3076s
+step  350 | loss   0.1821 | pre 0.2186 -> post 0.2184 | 3118s
+step  355 | loss  -0.0970 | pre 0.3410 -> post 0.3407 | 3154s
+step  360 | loss   0.0172 | pre 0.1157 -> post 0.1149 | 3208s
+VAL  step  360 | twelve configs @ seed 123, K=0: 0.1424
+step  365 | loss   0.1247 | pre 0.4488 -> post 0.2985 | 3274s
+step  370 | loss  -0.1018 | pre 0.1391 -> post 0.1373 | 3306s
+step  375 | loss  -0.3316 | pre 0.0478 -> post 0.0381 | 3335s
+step  380 | loss  -0.0000 | pre 0.1760 -> post 0.1658 | 3368s
+VAL  step  380 | twelve configs @ seed 123, K=0: 0.1314
+step  385 | loss  -0.2194 | pre 0.2288 -> post 0.2125 | 3438s
+step  390 | loss  -0.0163 | pre 0.0957 -> post 0.0888 | 3469s
+step  395 | loss  -0.0364 | pre 0.1095 -> post 0.1004 | 3511s
+step  400 | loss  -0.0148 | pre 0.1852 -> post 0.1816 | 3543s
+VAL  step  400 | twelve configs @ seed 123, K=0: 0.1259
+step  405 | loss   0.0037 | pre 0.0943 -> post 0.0801 | 3613s
+step  410 | loss   0.1052 | pre 0.3944 -> post 0.3706 | 3647s
+step  415 | loss  -0.0173 | pre 0.2767 -> post 0.2672 | 3681s
+step  420 | loss  -0.1473 | pre 0.1279 -> post 0.1229 | 3719s
+VAL  step  420 | twelve configs @ seed 123, K=0: 0.1412
+step  425 | loss  -0.0774 | pre 0.1568 -> post 0.1485 | 3787s
+step  430 | loss  -0.4026 | pre 0.1639 -> post 0.1627 | 3825s
+step  435 | loss  -0.4402 | pre 0.3049 -> post 0.2879 | 3861s
+step  440 | loss  -0.1584 | pre 0.1434 -> post 0.1393 | 3896s
+VAL  step  440 | twelve configs @ seed 123, K=0: 0.1765
+step  445 | loss   0.0323 | pre 0.2136 -> post 0.2133 | 3969s
+step  450 | loss  -0.2105 | pre 0.0735 -> post 0.0705 | 4004s
+step  455 | loss   0.0009 | pre 0.2638 -> post 0.2629 | 4041s
+step  460 | loss  -0.0704 | pre 0.1559 -> post 0.1551 | 4081s
+VAL  step  460 | twelve configs @ seed 123, K=0: 0.1535
+step  465 | loss  -0.0793 | pre 0.1465 -> post 0.1267 | 4155s
+step  470 | loss  -0.0265 | pre 0.2395 -> post 0.1832 | 4192s
+step  475 | loss  -0.1233 | pre 0.1004 -> post 0.0957 | 4227s
+step  480 | loss  -0.1825 | pre 0.1884 -> post 0.1750 | 4268s
+VAL  step  480 | twelve configs @ seed 123, K=0: 0.1543
+step  485 | loss  -0.0714 | pre 0.3594 -> post 0.3575 | 4344s
+step  490 | loss  -0.0223 | pre 0.2297 -> post 0.2197 | 4383s
+step  495 | loss  -0.0812 | pre 0.2728 -> post 0.2680 | 4415s
+step  500 | loss   0.0610 | pre 0.3171 -> post 0.2531 | 4440s
+VAL  step  500 | twelve configs @ seed 123, K=0: 0.1475
+step  505 | loss   0.1049 | pre 0.3498 -> post 0.3096 | 4511s
+step  510 | loss   0.1422 | pre 0.1736 -> post 0.1432 | 4540s
+step  515 | loss  -0.0153 | pre 0.3027 -> post 0.2946 | 4570s
+step  520 | loss   0.0010 | pre 0.0858 -> post 0.0857 | 4609s
+VAL  step  520 | twelve configs @ seed 123, K=0: 0.2409
+step  525 | loss  -0.0000 | pre 0.2723 -> post 0.2721 | 4682s
+step  530 | loss   0.1592 | pre 0.1209 -> post 0.1203 | 4725s
+step  535 | loss   0.0115 | pre 0.2674 -> post 0.2660 | 4753s
+step  540 | loss  -0.6071 | pre 0.1546 -> post 0.1541 | 4789s
+VAL  step  540 | twelve configs @ seed 123, K=0: 0.2483
+step  545 | loss   0.3126 | pre 0.1154 -> post 0.1075 | 4861s
+step  550 | loss  -0.0796 | pre 0.2187 -> post 0.1942 | 4893s
+step  555 | loss  -0.2934 | pre 0.2192 -> post 0.2176 | 4932s
+step  560 | loss  -0.2294 | pre 0.1133 -> post 0.1114 | 4973s
+VAL  step  560 | twelve configs @ seed 123, K=0: 0.2171
+step  565 | loss  -0.1937 | pre 0.0624 -> post 0.0597 | 5048s
+step  570 | loss  -0.0108 | pre 0.1689 -> post 0.1311 | 5084s
+step  575 | loss  -0.0727 | pre 0.1132 -> post 0.1114 | 5122s
+step  580 | loss   0.1480 | pre 0.2523 -> post 0.2508 | 5161s
+VAL  step  580 | twelve configs @ seed 123, K=0: 0.2061
+step  585 | loss   0.2627 | pre 0.2760 -> post 0.2748 | 5228s
+step  590 | loss  -0.0633 | pre 0.2341 -> post 0.2298 | 5276s
+step  595 | loss   0.0375 | pre 0.2246 -> post 0.1881 | 5308s
+step  600 | loss  -0.3306 | pre 0.1434 -> post 0.1405 | 5348s
+VAL  step  600 | twelve configs @ seed 123, K=0: 0.2177
+
+best selection objective: 0.1229
+checkpoint: result/SearchInLoop_seed9_firelogit_sel123_best.pt
+NOTE: selected on the twelve reported configurations at seed 123 (K=0), same rule as the baselines.

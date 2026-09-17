@@ -24,7 +24,9 @@ import argparse
 import random
 import time
 
+import numpy as np
 import torch
+from tensordict.tensordict import TensorDict
 
 from rl4co.models.zoo.am.policy import AttentionModelPolicy
 
@@ -41,6 +43,50 @@ ALL_EVAL_CONFIGS = [
     (30, 30, 10), (30, 40, 10), (40, 50, 10),
     (50, 50, 15), (50, 70, 15), (70, 100, 15),
 ]
+
+
+# Checkpoint selection set. Identical to VAL_SEED / VAL_N / VAL_SIZES in
+# rl/DWTA_GNN_TRAIN_search_in_loop.py, so AM is selected by the same rule as
+# our model: twenty instances at training scale, none of them from the twelve
+# reported configurations.
+VAL_SEED = 7717
+VAL_N = 20
+VAL_SIZES = [(m, n, t) for m in (5, 6, 7) for n in (5, 6, 7) for t in (5, 6, 7)]
+
+
+def build_val_set(device):
+    """Same size sequence and same instances as validate() in
+    rl/DWTA_GNN_TRAIN_search_in_loop.py: sizes from default_rng(VAL_SEED),
+    instances from default_rng(VAL_SEED + 1)."""
+    from common.temporal_dilemma_generator_moderate import generate_moderate_temporal_instance
+    rng_sz = np.random.default_rng(VAL_SEED)
+    rng_in = np.random.default_rng(VAL_SEED + 1)
+    val = []
+    for _ in range(VAL_N):
+        M, N, T = VAL_SIZES[int(rng_sz.integers(0, len(VAL_SIZES)))]
+        V, P, TW, AMM, PREP, _cost = generate_moderate_temporal_instance(M, N, T, rng=rng_in)
+        td = TensorDict(
+            {
+                "value": torch.tensor([V], dtype=torch.float32),
+                "prob": torch.tensor(np.asarray(P)[None], dtype=torch.float32),
+                "tw_start": torch.tensor([[tw[0] for tw in TW]], dtype=torch.float32),
+                "tw_end": torch.tensor([[tw[1] for tw in TW]], dtype=torch.float32),
+                "amm": torch.tensor([AMM], dtype=torch.float32),
+                "prep": torch.tensor([PREP], dtype=torch.float32),
+            },
+            batch_size=[1],
+        ).to(device)
+        val.append((M, N, T, td))
+    return val
+
+
+def validate(policy, val_set):
+    scores = []
+    for M, N, T, td in val_set:
+        env = DWTAEnv(generator=DWTAModerateGenerator(num_weapon=M, num_target=N, max_time=T))
+        env.M, env.N, env.T = M, N, T
+        scores.append(eval_rl4co_policy(policy, env, td))
+    return float(np.mean(scores))
 
 
 def sample_scale():
@@ -63,6 +109,14 @@ def main():
     # half the capacity of every other learned method in the comparison.
     # Exposed so the baseline can be matched to the others.
     parser.add_argument('--num_encoder_layers', type=int, default=3)
+    # 'val' selects the best checkpoint on the training-scale validation set
+    # (same rule as our model). 'test' is the original behaviour, which
+    # selected on the twelve reported configurations; kept only so the
+    # earlier AM numbers can be reproduced.
+    parser.add_argument('--select_on', choices=['val', 'test'], default='val')
+    # Also print the twelve-config zero-shot scores at each eval. Monitoring
+    # only; never used for selection when --select_on val.
+    parser.add_argument('--log_test', action='store_true')
     args = parser.parse_args()
 
     torch.manual_seed(args.seed)
@@ -93,6 +147,9 @@ def main():
     # Encoder depth is in the filename so a deeper run cannot overwrite the
     # three-layer checkpoint the earlier table was produced from.
     depth_tag = "" if args.num_encoder_layers == 3 else f"_L{args.num_encoder_layers}"
+    if args.select_on == 'val':
+        depth_tag += "_valsel"
+    val_set = build_val_set(device) if args.select_on == 'val' else None
     best_path = f"result/RL4CO_AM_multiscale_seed{args.seed}{depth_tag}_best_policy.pt"
 
     t0 = time.time()
@@ -126,9 +183,10 @@ def main():
 
         if step % args.eval_every == 0 or step == args.total_steps:
             policy.eval()
-            print(f"--- [MULTISCALE] zero-shot eval at step {step} ---", flush=True)
+            print(f"--- [MULTISCALE] eval at step {step} ---", flush=True)
             scores = []
-            for eM, eN, eT in ALL_EVAL_CONFIGS:
+            run_test = args.select_on == 'test' or args.log_test
+            for eM, eN, eT in (ALL_EVAL_CONFIGS if run_test else []):
                 eval_gen = DWTAModerateGenerator(num_weapon=eM, num_target=eN, max_time=eT)
                 eval_env = DWTAEnv(generator=eval_gen)
                 eval_env.M, eval_env.N, eval_env.T = eM, eN, eT
@@ -142,19 +200,24 @@ def main():
                     ref += f" SCIP={scip_mean:.4f}"
                 print(f"    {eM}M_{eN}N_{eT}T: AM={am_mean:.4f}  {ref}", flush=True)
 
-            mean_score = sum(scores) / len(scores)
+            if scores:
+                print(f"    mean_across_12_configs={sum(scores) / len(scores):.4f}", flush=True)
+            if args.select_on == 'val':
+                mean_score = validate(policy, val_set)
+            else:
+                mean_score = sum(scores) / len(scores)
             if mean_score < best_mean_score:
                 best_mean_score = mean_score
                 best_step = step
                 torch.save(policy.state_dict(), best_path)
-            print(f"    mean_across_12_configs={mean_score:.4f}  "
+            print(f"    select[{args.select_on}]={mean_score:.4f}  "
                   f"(best so far: {best_mean_score:.4f} at step {best_step})", flush=True)
             policy.train()
 
     save_path = f"result/RL4CO_AM_multiscale_seed{args.seed}{depth_tag}_final_policy.pt"
     torch.save(policy.state_dict(), save_path)
     print(f"Saved final policy to {save_path}")
-    print(f"Saved best policy (step {best_step}, mean_across_12_configs={best_mean_score:.4f}) to {best_path}")
+    print(f"Saved best policy (step {best_step}, select[{args.select_on}]={best_mean_score:.4f}) to {best_path}")
 
 
 if __name__ == "__main__":

@@ -80,37 +80,30 @@ and each weapon node aggregates the messages of its incident edges through a GRU
 \bm{h}_m^{\text{wpn},(\ell)} &= \text{GRU}\Big(\textstyle\sum_{n=1}^{N} \bm{\mu}_{m,n}^{(\ell)},\ \bm{h}_m^{\text{wpn},(\ell-1)}\Big),
 \end{aligned}
 \end{equation}
-where $\|$ denotes concatenation. The target update $\bm{h}_n^{\text{tgt},(\ell)}$ is defined analogously, aggregating over all weapons. After $L$ rounds, each weapon embedding $\bm{h}_m^{\text{wpn},(L)}$ reflects the state of the whole battlefield, and each edge embedding $\bm{h}_{m,n}^{\text{edge},(L)}$ carries the pair information that the decoder scores (Section~\ref{sec:parallel-decoder}).
+where $\|$ denotes concatenation. The target update $\bm{h}_n^{\text{tgt},(\ell)}$ is defined analogously, aggregating over all weapons. After $L$ rounds, each weapon embedding $\bm{h}_m^{\text{wpn},(L)}$ reflects the state of the whole battlefield, and the edge embeddings $\bm{h}_{m,n}^{\text{edge},(L)}$ have carried kill probabilities into it. The decoder reads only the weapon embeddings (Section~\ref{sec:parallel-decoder}).
 
 
 \subsection{Binary Participation Policy}
 \label{sec:parallel-decoder}
 
-For each weapon $m$, the policy scores two kinds of options from the encoder
-output: firing at each legal target $n \in \mathcal{L}_{m,t}$, and holding,
+\paragraph{Fire logit} The head reads one scalar per weapon. It takes the
+weapon's final embedding together with the mean embeddings of all weapons and
+all targets,
 \begin{equation}
-\label{eq:edge-score}
-\text{score}_{m,n} = \bm{w}_e^\top \, \text{Res}\big(\bm{h}_{m,n}^{\text{edge},(L)}\big), \quad n \in \mathcal{L}_{m,t},
-\end{equation}
-\begin{equation}
-\label{eq:noop-score}
-\text{score}_{m,\text{hold}} = \bm{w}_0^\top \, \text{Res}\!\left(\bm{W}_0\left[\bm{h}_m^{\text{wpn},(L)} \,\|\, \bar{\bm{h}}^{\text{wpn}} \,\|\, \bar{\bm{h}}^{\text{tgt}}\right]\right),
+\label{eq:fire-logit}
+\ell_{m,t} = \bm{w}_f^\top \, \text{Res}\!\left(\bm{W}_f\left[\bm{h}_m^{\text{wpn},(L)} \,\|\, \bar{\bm{h}}^{\text{wpn}} \,\|\, \bar{\bm{h}}^{\text{tgt}}\right]\right),
 \end{equation}
 where $\text{Res}(\cdot)$ is a residual block with layer normalization and
 $\bar{\bm{h}}^{\text{wpn}}, \bar{\bm{h}}^{\text{tgt}}$ are the mean embeddings
-of all weapons and all targets. A softmax over these scores gives the
-probability of holding,
-\begin{equation}
-\label{eq:hold-prob}
-\pi_m(\text{hold} \mid s_t) = \frac{\exp(\text{score}_{m,\text{hold}})}{\exp(\text{score}_{m,\text{hold}}) + \sum_{n \in \mathcal{L}_{m,t}} \exp(\text{score}_{m,n})},
-\end{equation}
-and the probability of firing is its complement,
+of all weapons and all targets. The probability of firing is its sigmoid,
 \begin{equation}
 \label{eq:fire-prob}
-p_{m,t} = \pi_m(\text{fire} \mid s_t) = 1 - \pi_m(\text{hold} \mid s_t).
+p_{m,t} = \pi_m(\text{fire} \mid s_t) = \sigma(\ell_{m,t}) \cdot \mathbb{1}\!\left[\mathcal{L}_{m,t} \neq \emptyset\right],
 \end{equation}
-Which target the firing weapon engages is decided by the assignment step
-(Section~\ref{sec:auction}), not by the scores.
+so a weapon with no legal target holds whatever its logit says. The head
+produces no score for any target. Which target a firing weapon engages is
+decided by the assignment step (Section~\ref{sec:auction}), and the network
+has no output through which it could express a preference.
 
 All $M$ weapons are scored in one forward pass, and each decision is sampled
 independently:

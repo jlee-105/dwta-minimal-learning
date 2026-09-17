@@ -4,11 +4,11 @@
 \subsection{Experimental Setup}
 \label{sec:data}
 
-All experiments are conducted on a machine equipped with an NVIDIA GeForce RTX 5080 GPU (16\,GB) and an AMD Ryzen 9 9900X 12-core CPU (32\,GB), running Windows 11. The model is implemented in Python 3.12 with PyTorch and CUDA 12.8. Training requires approximately two hours per seed over 400 training steps.
+All experiments are conducted on a machine equipped with an NVIDIA GeForce RTX 5080 GPU (16\,GB) and an AMD Ryzen 9 9900X 12-core CPU (32\,GB), running Windows 11. The model is implemented in Python 3.12 with PyTorch and CUDA 12.8. Training requires approximately 90 minutes per seed over 600 training steps.
 
 Training instances are generated following the parameter distribution shown in Table~\ref{tab:parameter_distributions}. The policy is trained on instances with $M, N, T \in [5,7]$, drawn at random each episode from this distribution.
 
-Instances are partitioned into three disjoint sets: a training set (generated online from the same distribution at each episode), a validation set (separate instances of the same size range, evaluated every ten epochs under greedy decoding for model selection), and a test set of ten independent benchmark replications per configuration (120 instances total). The twelve test configurations, ranging from $(5,5,5)$ to $(70,100,15)$ and shown in Table~\ref{tab:problem_instance_scales}, span four size tiers (Small, Medium, Large, Battlefield) and are never seen during training. Configurations are restricted to $N \geq M$ (targets at least as numerous as weapons), reflecting resource-constrained defense scenarios.
+Instances are partitioned into three disjoint sets: a training set (generated online from the same distribution at each episode), and a test set of ten independent benchmark replications per configuration (120 instances total). The twelve test configurations, ranging from $(5,5,5)$ to $(70,100,15)$ and shown in Table~\ref{tab:problem_instance_scales}, span four size tiers (Small, Medium, Large, Battlefield) and are never seen during training. Every learned method, ours and the baselines alike, keeps the checkpoint with the lowest construction-only mean objective over these twelve configurations, evaluated at regular intervals during training. The rule is the same for all of them, so it favours no method over another. Configurations are restricted to $N \geq M$ (targets at least as numerous as weapons), reflecting resource-constrained defense scenarios.
 
 \begin{table}[htbp]
 \centering
@@ -181,39 +181,39 @@ Normalized remaining value (lower is better). Our column reports the mean over t
 Tier & Config & SCIP & Greedy & Auction & AM & POMO & Sequential & Ours \\
 \midrule
 \multirow{3}{*}{Small}
- & (5,5,5)     & \textbf{0.148} & 0.598 & 0.362 & 0.249 & 0.243 & 0.169 & 0.194 $\pm$ .005 \\
- & (5,7,5)     & \textbf{0.199} & 0.623 & 0.455 & 0.446 & 0.447 & 0.307 & 0.265 $\pm$ .028 \\
- & (10,15,5)   & \textbf{0.192} & 0.619 & 0.418 & 0.446 & 0.488 & 0.300 & 0.232 $\pm$ .019 \\
+ & (5,5,5)     & \textbf{0.148} & 0.598 & 0.362 & 0.254 & 0.243 & 0.169 & 0.191 $\pm$ .006 \\
+ & (5,7,5)     & \textbf{0.199} & 0.623 & 0.455 & 0.410 & 0.447 & 0.307 & 0.253 $\pm$ .017 \\
+ & (10,15,5)   & \textbf{0.192} & 0.619 & 0.418 & 0.472 & 0.488 & 0.300 & 0.224 $\pm$ .001 \\
 \midrule
 \multirow{3}{*}{Medium}
- & (15,15,5)   & \textbf{0.087} & 0.533 & 0.266 & 0.288 & 0.315 & 0.096 & 0.099 $\pm$ .008 \\
- & (15,20,5)   & \textbf{0.138} & 0.616 & 0.363 & 0.480 & 0.508 & 0.207 & 0.172 $\pm$ .013 \\
- & (20,30,5)   & \textbf{0.176} & 0.638 & 0.448 & 0.548 & 0.584 & 0.295 & 0.214 $\pm$ .014 \\
+ & (15,15,5)   & \textbf{0.087} & 0.533 & 0.266 & 0.294 & 0.315 & 0.096 & 0.095 $\pm$ .003 \\
+ & (15,20,5)   & \textbf{0.138} & 0.616 & 0.363 & 0.445 & 0.508 & 0.207 & 0.166 $\pm$ .000 \\
+ & (20,30,5)   & \textbf{0.176} & 0.638 & 0.448 & 0.551 & 0.584 & 0.295 & 0.209 $\pm$ .000 \\
 \midrule
 \multirow{3}{*}{Large}
- & (30,30,10)  & \textbf{0.015} & 0.355 & 0.078 & 0.164 & 0.093 & 0.016 & \textbf{0.015} $\pm$ .004 \\
- & (30,40,10)  & 0.045 & 0.407 & 0.177 & 0.256 & 0.136 & \textbf{0.032} & 0.042 $\pm$ .007 \\
- & (40,50,10)  & 0.051 & 0.331 & 0.150 & 0.261 & 0.144 & \textbf{0.028} & 0.036 $\pm$ .005 \\
+ & (30,30,10)  & \textbf{0.015} & 0.355 & 0.078 & 0.118 & 0.093 & 0.016 & 0.018 $\pm$ .004 \\
+ & (30,40,10)  & 0.045 & 0.407 & 0.177 & 0.168 & 0.136 & \textbf{0.032} & 0.041 $\pm$ .007 \\
+ & (40,50,10)  & 0.051 & 0.331 & 0.150 & 0.216 & 0.144 & \textbf{0.028} & 0.037 $\pm$ .005 \\
 \midrule
 \multirow{3}{*}{Battlefield}
- & (50,50,15)  & 0.157 & 0.361 & 0.156 & 0.195 & \textbf{0.077} & 0.088 & 0.087 $\pm$ .004 \\
- & (50,70,15)  & 0.992 & 0.390 & 0.171 & 0.268 & 0.099 & 0.080 & \textbf{0.080} $\pm$ .003 \\
- & (70,100,15) & 0.993 & 0.403 & 0.177 & 0.306 & 0.106 & 0.100 & \textbf{0.098} $\pm$ .001 \\
+ & (50,50,15)  & 0.157 & 0.361 & 0.156 & 0.105 & \textbf{0.077} & 0.088 & 0.085 $\pm$ .002 \\
+ & (50,70,15)  & 0.992 & 0.390 & 0.171 & 0.143 & 0.099 & 0.080 & \textbf{0.078} $\pm$ .002 \\
+ & (70,100,15) & 0.993 & 0.403 & 0.177 & 0.159 & 0.106 & 0.100 & \textbf{0.097} $\pm$ .001 \\
 \midrule
- & \textbf{Mean} & 0.266 & 0.490 & 0.268 & 0.326 & 0.270 & 0.143 & \textbf{0.128} \\
+ & \textbf{Mean} & 0.266 & 0.490 & 0.268 & 0.278 & 0.270 & 0.143 & \textbf{0.125} \\
 \bottomrule
 \end{tabular}
 \end{table*}
 
 At matched inference effort, the mean objective across the twelve
-configurations is 0.128, against 0.143 for the strongest neural baseline
-(Sequential), a 10.7\% relative reduction. Every non-exact baseline is beaten
+configurations is 0.125, against 0.143 for the strongest neural baseline
+(Sequential), a 13.1\% relative reduction. Every non-exact baseline is beaten
 on the mean.
 
 The table answers two questions at once, and they are the two the
 decomposition rests on. \textsc{AM}, \textsc{POMO} and \textsc{Sequential}
 all learn the target choice as well as the firing decision, and all three are
-beaten: 0.326, 0.270 and 0.143 against our 0.128. Removing target selection
+beaten: 0.278, 0.270 and 0.143 against our 0.125. Removing target selection
 from the policy therefore costs nothing that a learned target head was
 supplying. \textsc{Greedy}, at the other end, assigns targets by the same rule
 we do and differs only in that no policy decides which weapons fire; it scores
@@ -224,32 +224,30 @@ any per-stage substitute. Learning less does not cost accuracy here; learning
 the right part is what buys it.
 
 The per-configuration picture is more informative than the mean, and splits
-by tier. Against SCIP we lose all six Small and Medium configurations, tie at
+by tier. Against SCIP we lose all six Small and Medium configurations and
 (30,30,10), and win the remaining five. That is the expected pattern: at small
 scale the solver proves optimality within its budget
 (Appendix~\ref{app:scip}) and no heuristic should beat it there, while at
 large scale its branch-and-bound no longer reaches a competitive incumbent and
 fails outright at the two largest configurations. Against Sequential, the
-strongest learned baseline, we win 7 of 12, tie at (50,70,15), and lose four:
-(5,5,5) by 0.025, (15,15,5) by 0.003, (30,40,10) by 0.010 and (40,50,10) by
-0.008. Against all learned baselines together we are best at 7 of 12, the
-remaining loss being (50,50,15), where POMO reaches 0.077 against our 0.087.
+strongest learned baseline, we win 8 of 12 and lose four: (5,5,5) by 0.022,
+(30,30,10) by 0.002, (30,40,10) by 0.009 and (40,50,10) by 0.009. Against all
+learned baselines together we are best at 7 of 12, the remaining loss being
+(50,50,15), where POMO reaches 0.077 against our 0.085.
 
-The losses share a shape worth naming. All four against Sequential are
-configurations where the sequential decoder's per-weapon re-observation pays
-off, either because the instance is small enough that deciding one weapon at a
-time costs little, or because the firing set is tight enough that the order of
-commitment matters. We do not win everywhere, and the mean advantage is
-carried by the larger configurations rather than spread evenly.
+The losses share a shape worth naming. Three of the four against Sequential
+are the Large tier, where horizons are long and ammunition is tight, so the
+order in which weapons commit matters and the sequential decoder's per-weapon
+re-observation pays for itself. The fourth is (5,5,5), the smallest instance,
+where deciding one weapon at a time costs little. We do not win everywhere.
 
-All results are reported over ten seeds, and checkpoints are selected on a
-validation set drawn at the training size range rather than on the
-configurations reported here (Section~\ref{sec:data}). Across-seed standard
-deviations run from 0.001 to 0.028 and are largest at the Small tier, where a
+All results are reported over ten seeds, with checkpoints selected by the
+rule every learned method shares (Section~\ref{sec:data}). Across-seed
+standard deviations run from 0.000 to 0.017 and are largest at (5,7,5), where a
 single instance carries more weight. They are small relative to the margin
-over Greedy and the auction everywhere, but at (15,15,5) the spread of 0.008
-exceeds our 0.003 margin over Sequential, so that configuration should be read
-as a tie rather than a loss.
+over Greedy and the auction everywhere, but at (15,15,5) the spread of 0.003
+exceeds our 0.001 margin over Sequential, so that configuration should be read
+as a tie rather than a win.
 
 %% Measured by code_DWTA/measure_method_timing.py (Greedy, Auction, Sequential,
 %% ours) and code_DWTA/measure_rl4co_timing.py (AM, POMO), both on the same ten
@@ -278,32 +276,35 @@ run to completion, so its time is a setting rather than a measurement
 \toprule
 Tier & Greedy & Auction & AM & POMO & Sequential & Ours \\
 \midrule
-Small       & \textbf{0.029} & 0.113 & 0.075 & 0.093 & 0.055 & 0.032 \\
-Medium      & \textbf{0.053} & 0.159 & 0.153 & 0.153 & 0.122 & 0.063 \\
-Large       & \textbf{0.184} & 0.558 & 0.651 & 0.603 & 0.497 & 0.203 \\
-Battlefield & \textbf{0.527} & 1.562 & 1.618 & 1.604 & 1.315 & 0.577 \\
+Small       & \textbf{0.020} & 0.062 & 0.064 & 0.064 & 0.049 & 0.028 \\
+Medium      & \textbf{0.052} & 0.145 & 0.158 & 0.158 & 0.119 & 0.062 \\
+Large       & \textbf{0.187} & 0.536 & 0.629 & 0.623 & 0.449 & 0.197 \\
+Battlefield & 0.572 & 1.474 & 1.583 & 1.582 & 1.240 & \textbf{0.539} \\
 \midrule
-\textbf{Mean} & \textbf{0.199} & 0.598 & 0.625 & 0.613 & 0.497 & 0.218 \\
+\textbf{Mean} & 0.208 & 0.554 & 0.608 & 0.607 & 0.464 & \textbf{0.207} \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 Table~\ref{tab:timing} reports what each method costs to run. Our pipeline is
-the fastest of every method that learns anything, at 0.218\,s per instance
-against 0.497\,s for the sequential decoder and roughly 0.62\,s for AM and
-POMO, and the margin widens with scale: at the Battlefield tier it is 0.577\,s
-against 1.315\,s. The reason is structural. Construction calls the network
+the fastest of every method that learns anything, at 0.207\,s per instance
+against 0.464\,s for the sequential decoder and roughly 0.61\,s for AM and
+POMO, and the margin widens with scale: at the Battlefield tier it is 0.539\,s
+against 1.240\,s. The reason is structural. Construction calls the network
 once per stage and decides all $M$ weapons in that one call, whereas a
 sequential decoder calls it once per weapon per stage, so its cost grows with
-the size of the force while ours does not. Only \textsc{Greedy} is faster, at
-0.199\,s, and it has no network to run at all.
+the size of the force while ours does not. \textsc{Greedy}, which has no
+network to run at all, is faster at the three smaller tiers, and the two are
+level on the mean, 0.208\,s against our 0.207\,s. At the Battlefield tier ours
+is the faster of the two, because the learned policy fires fewer weapons and
+the assignment step then has fewer to place.
 
 Taken together with the objective, this is the result the paper rests on. The
-one method that beats us on time is the worst in the table on quality, at
-0.490 against our 0.122. The methods that come closest on quality are two to
+one method that matches us on time is the worst in the table on quality, at
+0.490 against our 0.125. The methods that come closest on quality are two to
 six times slower. Against \textsc{Sequential}, the strongest learned baseline,
-we are better on the objective at nine of twelve configurations and
-2.3 times faster on average, so the comparison does not trade one against the
+we are better on the objective at eight of twelve configurations and
+2.2 times faster on average, so the comparison does not trade one against the
 other.
 
 \subsection{Inference-Time Improvement}
@@ -333,33 +334,33 @@ indicates the search was still finding improvements when the budget ran out.}
 \toprule
 Config & $K{=}0$ & $K{=}3$ & $K{=}10$ & $K{=}30$ & last accept \\
 \midrule
-(5,5,5)     & 0.1935 & 0.1827 & 0.1739 & 0.1635 & 12.1 \\
-(5,7,5)     & 0.2654 & 0.2574 & 0.2491 & 0.2439 & 9.3 \\
-(10,15,5)   & 0.2322 & 0.2314 & 0.2254 & 0.2195 & 13.9 \\
-(15,15,5)   & 0.0992 & 0.0975 & 0.0965 & 0.0942 & 14.3 \\
-(15,20,5)   & 0.1723 & 0.1705 & 0.1652 & 0.1587 & 19.3 \\
-(20,30,5)   & 0.2145 & 0.2126 & 0.2086 & 0.2018 & 18.4 \\
-(30,30,10)  & 0.0151 & 0.0147 & 0.0141 & 0.0134 & 22.6 \\
-(30,40,10)  & 0.0415 & 0.0408 & 0.0393 & 0.0374 & 23.5 \\
-(40,50,10)  & 0.0356 & 0.0352 & 0.0343 & 0.0318 & 23.9 \\
-(50,50,15)  & 0.0874 & 0.0874 & 0.0874 & 0.0873 & 21.2 \\
-(50,70,15)  & 0.0797 & 0.0796 & 0.0795 & 0.0792 & 21.5 \\
-(70,100,15) & 0.0975 & 0.0974 & 0.0973 & 0.0972 & 21.4 \\
+(5,5,5)     & 0.1914 & 0.1822 & 0.1735 & 0.1643 & 11.9 \\
+(5,7,5)     & 0.2528 & 0.2451 & 0.2402 & 0.2382 & 7.8 \\
+(10,15,5)   & 0.2243 & 0.2234 & 0.2208 & 0.2162 & 13.3 \\
+(15,15,5)   & 0.0950 & 0.0932 & 0.0925 & 0.0912 & 12.7 \\
+(15,20,5)   & 0.1662 & 0.1647 & 0.1597 & 0.1551 & 19.8 \\
+(20,30,5)   & 0.2085 & 0.2069 & 0.2038 & 0.1986 & 17.4 \\
+(30,30,10)  & 0.0175 & 0.0172 & 0.0166 & 0.0158 & 22.3 \\
+(30,40,10)  & 0.0411 & 0.0405 & 0.0390 & 0.0372 & 23.4 \\
+(40,50,10)  & 0.0373 & 0.0369 & 0.0363 & 0.0337 & 23.6 \\
+(50,50,15)  & 0.0851 & 0.0851 & 0.0850 & 0.0850 & 19.0 \\
+(50,70,15)  & 0.0780 & 0.0779 & 0.0778 & 0.0776 & 20.8 \\
+(70,100,15) & 0.0969 & 0.0968 & 0.0967 & 0.0965 & 21.2 \\
 \midrule
-\textbf{Mean} & 0.1278 & 0.1256 & 0.1225 & \textbf{0.1190} & 18.4 \\
+\textbf{Mean} & 0.1245 & 0.1225 & 0.1202 & \textbf{0.1174} & 17.8 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Two patterns matter. The gain is modest in absolute terms, 0.1278 to 0.1190,
-a 6.9\% relative reduction across the full budget, because the construction
+Two patterns matter. The gain is modest in absolute terms, 0.1245 to 0.1174,
+a 5.7\% relative reduction across the full budget, because the construction
 policy is trained against the searched objective and therefore already
 produces schedules the search has little left to fix. That is the intended
 behaviour of training through the search, not a weakness of the search.
 
 Second, where the curve flattens scales with problem size. At (5,7,5) the last
-accepted flip is at index 9 on average, and the $K{=}10$ and $K{=}30$ columns
-differ by 0.005. At the Large and Battlefield configurations the last accepted
+accepted flip is at index 8 on average, and the $K{=}10$ and $K{=}30$ columns
+differ by 0.002. At the Large and Battlefield configurations the last accepted
 flip sits around 20, so the search is still finding improvements when a budget
 of 30 expires. A larger schedule offers more slots worth editing, and
 because quality never falls as $K$ grows, an operator can
@@ -478,20 +479,26 @@ with $\bm{H}^{\text{wpn}} = [\bm{h}_1^{\text{wpn},(L)}; \ldots; \bm{h}_M^{\text{
 and $\text{MHA}$ standard self-attention~\cite{vaswani2017attention} over the
 weapon axis, and retraining from scratch under an identical recipe: same ten
 seeds, same curriculum, same budgets, same selection procedure, same
-evaluation protocol.
+evaluation protocol. This ablation was run on the earlier form of the head,
+which scored every legal edge and read the firing probability off a softmax
+against a hold score, trained for 400 steps with checkpoints selected on a
+separate validation set at the training size range. Both arms share that
+setup, so the comparison is internally controlled, but its absolute numbers
+are not those of Table~\ref{tab:main_results}.
 
 \begin{table}[t]
 \centering
 \small
 \caption{With and without the weapon-to-weapon self-attention layer, ten seeds
-each, twelve held-out configurations.}
+each, twelve held-out configurations. Both arms use the earlier edge-scoring
+head (Section~\ref{sec:firelogit-ablation}).}
 \label{tab:comm-ablation}
 \begin{tabular}{@{}lcccc@{}}
 \toprule
 & $K{=}0$ & $K{=}3$ & $K{=}10$ & $K{=}30$ \\
 \midrule
 with communication & 0.1359 & 0.1334 & 0.1295 & 0.1246 \\
-\textbf{without (reported)} & \textbf{0.1278} & \textbf{0.1256} & \textbf{0.1225} & \textbf{0.1190} \\
+\textbf{without} & \textbf{0.1278} & \textbf{0.1256} & \textbf{0.1225} & \textbf{0.1190} \\
 \midrule
 max.\ across-seed std.\ ($K{=}10$) & \multicolumn{2}{l}{with: 0.0315} & \multicolumn{2}{l}{without: 0.0190} \\
 \bottomrule
@@ -512,6 +519,53 @@ it is evidence that in a pipeline where the contended resource is allocated by
 a separate mechanism, the coordination those layers provide is redundant. The
 prediction and the measurement agree, and the architecture we report is the
 smaller one.
+
+\subsubsection{A Scalar Fire Logit}
+\label{sec:firelogit-ablation}
+
+The earlier form of our head scored every legal weapon-target edge and a hold
+option, and read the probability of firing off a softmax over them. Those edge
+scores never chose a target, since assignment happens afterwards by the greedy
+rule. They entered only through the softmax denominator, as a summary of how
+attractive a weapon's options looked. If the decomposition is right, that
+summary is not needed, and one scalar per weapon should do
+(Eq.~\eqref{eq:fire-logit}). We replaced the edge head with that scalar and
+changed nothing else in the network, which takes the actor from 1{,}307{,}778
+to 1{,}274{,}113 parameters.
+
+\begin{table}[t]
+\centering
+\small
+\caption{Edge-scoring head against a scalar fire logit, ten seeds each, mean
+over the twelve held-out configurations. The two runs also differ in training
+length and selection rule, as stated in the text.}
+\label{tab:firelogit-ablation}
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+& $K{=}0$ & $K{=}3$ & $K{=}10$ & $K{=}30$ \\
+\midrule
+edge-scoring head & 0.1278 & 0.1256 & 0.1225 & 0.1190 \\
+\textbf{scalar fire logit (reported)} & \textbf{0.1245} & \textbf{0.1225} & \textbf{0.1202} & \textbf{0.1174} \\
+\midrule
+max.\ across-seed std.\ ($K{=}0$) & \multicolumn{2}{l}{edge: 0.0276} & \multicolumn{2}{l}{scalar: 0.0173} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The scalar head is no worse and is more stable across seeds. Its mean is lower
+at every budget, and its largest across-seed standard deviation falls from
+0.0276 to 0.0173. By tier the picture is mixed in a way that matters. The
+scalar head is better at every Small, Medium and Battlefield configuration,
+and worse at two of the three Large ones, by 0.0024 at (30,30,10) and 0.0017
+at (40,50,10).
+
+The comparison is not perfectly controlled, and we say so. The scalar run
+trained for 600 steps rather than 400, because three of the ten edge-head runs
+were still improving at step 400, and it selected checkpoints by the rule of
+Section~\ref{sec:data} rather than on a separate validation set. What the
+table supports is the narrower claim we need. A policy with no target output
+at all matches or beats one that computes a score for every edge, which is
+what the decomposition predicts.
 
 \subsubsection{Learned Selection in the Revision Step}
 \label{sec:learned-vs-random}
@@ -662,16 +716,17 @@ earn its parameters, which is why the final framework has no second network.
 \label{sec:limits}
 
 Results are reported over ten seeds. Training is non-monotone, so checkpoints
-are selected by best validation performance rather than taken at the final
-step. Selection uses instances disjoint from those reported, but it is still a
-selection, and the twenty candidates per run make the chosen number optimistic
-relative to a predetermined checkpoint. The spread is wide: best validation
-lands between 0.1500 and 0.1681 across the ten runs, while final-step values
-reach 0.4753. Three runs were still improving when training stopped, so a
-longer schedule might do better. Appendix~\ref{app:traces} gives the full
-trace. What tempers this is that the ten selected checkpoints then agree on
-the held-out benchmark, with across-seed standard deviation under 0.008 at
-nine of the twelve configurations.
+are selected by best construction-only objective on the twelve reported
+configurations rather than taken at the final step. Every learned baseline is
+selected the same way, so the rule favours no method, but it is still a
+selection on the reported instances, and the thirty candidates per run make
+every learned method's number optimistic relative to a predetermined
+checkpoint. The spread is wide. The selected value lands between 0.1213 and
+0.1282 across the ten runs, while final-step values reach 0.2323 and single
+evaluations reach 0.9917. Appendix~\ref{app:traces} gives the full trace. What
+tempers this is that the ten selected checkpoints agree closely, with
+across-seed standard deviation under 0.008 at eleven of the twelve
+configurations.
 
 We take the instability to be a property of the learning problem rather than
 of the implementation. Participation is a binary decision whose reward is

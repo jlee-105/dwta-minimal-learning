@@ -19,7 +19,7 @@ import torch
 sys.path.append("rl")
 
 from common.TORCH_OBJECTS import DEVICE
-from common.DWTA_GNN import create_gnn_actor
+from common.DWTA_GNN_firelogit import create_gnn_actor_firelogit
 from common.DWTA_GNN_sequential import create_gnn_actor_sequential
 from common.DWTA_Simulator import Environment
 from common.Dynamic_Instance_generation import input_generation
@@ -37,7 +37,7 @@ CONFIGS = [(5, 5, 5), (5, 7, 5), (10, 15, 5),
 TIERS = ["Small"] * 3 + ["Medium"] * 3 + ["Large"] * 3 + ["Battlefield"] * 3
 N_EVAL, N_WARM, SEED = 10, 2, 123
 
-OURS_CKPT = "result/SearchInLoop_seed5_nocomm_best.pt"
+OURS_CKPT = "result/SearchInLoop_seed5_firelogit_sel123_best.pt"
 SEQ_CKPT = "result/Sequential_multiscale_seed5_best_actor.pt"
 
 
@@ -120,7 +120,7 @@ def time_method(fn, instances, M, N, T, warm):
 
 
 def main():
-    ours = create_gnn_actor().to(DEVICE)
+    ours = create_gnn_actor_firelogit().to(DEVICE)
     ours.load_state_dict(torch.load(OURS_CKPT, map_location=DEVICE))
     ours.eval()
 

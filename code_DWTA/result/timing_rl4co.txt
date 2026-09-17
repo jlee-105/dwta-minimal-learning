@@ -1,28 +1,28 @@
-W0914 18:10:53.575000 17188 Lib\site-packages\torch\utils\flop_counter.py:29] triton not found; flop counting will not work for triton kernels
+W0917 08:04:10.679000 536 Lib\site-packages\torch\utils\flop_counter.py:29] triton not found; flop counting will not work for triton kernels
 Using CUDA GPU
-loaded AM from result/RL4CO_AM_multiscale_seed5_best_policy.pt
+loaded AM from result/RL4CO_AM_multiscale_seed5_L6_best_policy.pt
 loaded POMO from result/RL4CO_POMO_multiscale_seed5_best_policy.pt
 config                 AM       POMO
 [OK] All hyperparameters validated successfully!
    Problem size: 5W x 5T, MAX_TIME=5
    Model: EMBEDDING_DIM=128, HEAD_NUM=8
    Training: 200 epochs, 5 episodes/epoch
-5M_5N_5T           0.0468     0.0475
-5M_7N_5T           0.0462     0.0468
-10M_15N_5T         0.1327     0.1834
-15M_15N_5T         0.1400     0.1357
-15M_20N_5T         0.1375     0.1376
-20M_30N_5T         0.1817     0.1846
-30M_30N_10T        0.5557     0.5502
-30M_40N_10T        0.6844     0.5422
-40M_50N_10T        0.7141     0.7165
-50M_50N_15T        1.5313     1.4231
-50M_70N_15T        1.4389     1.4649
-70M_100N_15T       1.8842     1.9238
+5M_5N_5T           0.0496     0.0493
+5M_7N_5T           0.0489     0.0479
+10M_15N_5T         0.0935     0.0938
+15M_15N_5T         0.1429     0.1405
+15M_20N_5T         0.1415     0.1430
+20M_30N_5T         0.1899     0.1900
+30M_30N_10T        0.5598     0.5591
+30M_40N_10T        0.5647     0.5602
+40M_50N_10T        0.7622     0.7502
+50M_50N_15T        1.4019     1.4007
+50M_70N_15T        1.4011     1.3977
+70M_100N_15T       1.9450     1.9482
 
 tier                   AM       POMO
-Small              0.0752     0.0926
-Medium             0.1531     0.1526
-Large              0.6514     0.6030
-Battlefield        1.6181     1.6039
-MEAN               0.6245     0.6130
+Small              0.0640     0.0637
+Medium             0.1581     0.1578
+Large              0.6289     0.6232
+Battlefield        1.5827     1.5822
+MEAN               0.6084     0.6067

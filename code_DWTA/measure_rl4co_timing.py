@@ -33,7 +33,7 @@ TIERS = ["Small"] * 3 + ["Medium"] * 3 + ["Large"] * 3 + ["Battlefield"] * 3
 SEED, N_EVAL = 123, 10
 
 CKPTS = {
-    "AM": "result/RL4CO_AM_multiscale_seed5_best_policy.pt",
+    "AM": "result/RL4CO_AM_multiscale_seed5_L6_best_policy.pt",
     "POMO": "result/RL4CO_POMO_multiscale_seed5_best_policy.pt",
 }
 
@@ -68,7 +68,7 @@ def main():
     # differ only in encoder depth and normalization, so rebuild each with the
     # settings its own trainer used before loading the saved state dict.
     specs = {
-        "AM": dict(num_encoder_layers=3, normalization="batch"),
+        "AM": dict(num_encoder_layers=6, normalization="batch"),
         "POMO": dict(num_encoder_layers=6, normalization="batch"),
     }
     policies = {}
