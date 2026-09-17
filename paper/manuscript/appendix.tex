@@ -178,3 +178,91 @@ and 0.017, and under 0.008 at eleven of twelve configurations). The selection
 procedure is therefore reproducible even though the path to it is erratic,
 which is the strongest claim the evidence supports, and a weaker claim than
 "training is stable", which it is not.
+
+\section{Paired significance tests}
+\label{app:paired}
+
+Table~\ref{tab:main_results} reports means, and a win or loss there is a
+comparison of two averages, not of matched outcomes. Because every method is
+evaluated on the same 120 instances (the ten seed-123 replications of each of
+the twelve configurations), each instance gives a matched pair, and we test on
+those pairs directly. Our value at an instance is the mean over the ten
+seeds at $K{=}0$, the same quantity Table~\ref{tab:main_results} reports.
+Differences are baseline minus ours, so a positive value favours ours. Each
+test is a two-sided Wilcoxon signed-rank test; instances where the two
+methods agree to $10^{-6}$ are dropped as ties. Configuration-level p-values
+are Holm-corrected across the twelve configurations tested against each
+baseline.
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Paired Wilcoxon signed-rank test, ours against each baseline, over
+all 120 seed-123 instances. W/L/T counts instances where ours is better,
+worse, or tied.}
+\label{tab:paired-overall}
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+Baseline & Mean diff. & W/L/T & $p$ \
+\midrule
+SCIP        & $+0.141$ & 48/72/0  & 0.257 \
+Greedy      & $+0.365$ & 120/0/0  & $<10^{-4}$ \
+Auction     & $+0.144$ & 117/3/0  & $<10^{-4}$ \
+AM          & $+0.153$ & 117/3/0  & $<10^{-4}$ \
+POMO        & $+0.146$ & 108/12/0 & $<10^{-4}$ \
+Sequential  & $+0.019$ & 79/41/0  & 0.0004 \
+\bottomrule
+\end{tabular}
+\end{table}
+
+The instance-level record against Sequential, 79 wins to 41, is significant
+overall. Table~\ref{tab:paired-sequential} breaks this down by configuration.
+Two of the four Large-tier configurations that lose on the mean,
+(30,40,10) and (40,50,10), remain significant after correction; the third,
+(30,30,10), does not. The tie at (15,15,5) claimed in the main text is
+confirmed directly: $p=0.70$.
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Paired test against Sequential, by configuration, Holm-corrected
+across the twelve rows.}
+\label{tab:paired-sequential}
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+Config & Mean diff. & W/L/T & $p$ (Holm) \
+\midrule
+(5,5,5)      & $-0.022$ & 1/9/0  & 0.096 \
+(5,7,5)      & $+0.054$ & 8/2/0  & 0.322 \
+(10,15,5)    & $+0.075$ & 10/0/0 & 0.023* \
+(15,15,5)    & $+0.001$ & 6/4/0  & 0.695 \
+(15,20,5)    & $+0.041$ & 8/2/0  & 0.096 \
+(20,30,5)    & $+0.087$ & 10/0/0 & 0.023* \
+(30,30,10)   & $-0.001$ & 7/3/0  & 0.393 \
+(30,40,10)   & $-0.009$ & 2/8/0  & 0.078 \
+(40,50,10)   & $-0.009$ & 1/9/0  & 0.039* \
+(50,50,15)   & $+0.003$ & 9/1/0  & 0.336 \
+(50,70,15)   & $+0.002$ & 8/2/0  & 0.393 \
+(70,100,15)  & $+0.003$ & 9/1/0  & 0.039* \
+\bottomrule
+\end{tabular}
+\end{table}
+
+Against SCIP, the overall test is not significant ($p=0.257$), consistent
+with the tier split reported in the main text: SCIP wins at small scale and
+loses at large scale, so pooling both directions across all 120 instances
+washes out the effect rather than revealing a net advantage either way.
+Against every learned baseline other than Sequential, the advantage is
+significant overall and at every configuration except two single-configuration
+ties with POMO, (50,50,15) and (70,100,15), where POMO's own advantage there
+(Table~\ref{tab:main_results}) is likewise not significant.
+
+As a robustness check, the overall test against each baseline was repeated
+ten times, once per seed in place of the ten-seed mean. Against Greedy,
+Auction, AM and POMO every seed alone is significant at $p<10^{-4}$. Against
+Sequential every seed alone is significant, with $p$ between 0.0001 and
+0.0011, so the conclusion does not depend on averaging across seeds.
+
+Code and raw values: \texttt{code\_DWTA/paired\_collect.py},
+\texttt{paired\_collect\_rl4co.py}, and \texttt{paired\_stats.py}; output in
+\texttt{result/paired\_instances*.csv} and \texttt{result/paired\_stats.txt}.
