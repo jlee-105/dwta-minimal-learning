@@ -250,20 +250,20 @@ exceeds our 0.001 margin over Sequential, so that configuration should be read
 as a tie rather than a win.
 
 Configuration-level wins and losses average over seeds but not over the ten
-instances within a configuration, so we also test instance by instance. Our
-per-instance value, averaged over the ten seeds, is compared against every
-baseline's value on the same 120 seed-123 instances with a paired
-two-sided Wilcoxon signed-rank test. Against Greedy, Auction, AM and POMO the
-advantage is significant overall ($p<10^{-4}$ for all four) and at every
-configuration but one (POMO ties at (50,50,15) and (70,100,15), consistent
-with POMO's edge there). Against Sequential the instance-level record is 79
-wins and 41 losses of 120, significant overall ($p=0.0004$); at the
-configuration level, only two of the four Large-tier losses survive a
+instances within a configuration, so we also test instance by instance against
+every learned baseline. Our per-instance value, averaged over the ten seeds,
+is compared against each baseline's value on the same 120 seed-123 instances
+with a paired two-sided Wilcoxon signed-rank test. Against Greedy, Auction, AM
+and POMO the advantage is significant overall ($p<10^{-4}$ for all four) and
+at every configuration but one (POMO ties at (50,50,15) and (70,100,15),
+consistent with POMO's edge there). Against Sequential the instance-level
+record is 79 wins and 41 losses of 120, significant overall ($p=0.0004$); at
+the configuration level, only two of the four Large-tier losses survive a
 Holm correction across the twelve configurations, (30,40,10) and (40,50,10),
-and the (15,15,5) tie is confirmed ($p=0.70$). Against SCIP the instance-level
-record is 48 wins and 72 losses and the overall test is not significant
-($p=0.26$), which is consistent with the tier split above rather than a
-uniform advantage or disadvantage. All tests and per-instance values are in
+and the (15,15,5) tie is confirmed ($p=0.70$). SCIP is an exact solver rather
+than a learned baseline and is excluded from this test; the tier split above
+(Appendix~\ref{app:scip}) is the relevant comparison for it. All tests and
+per-instance values for the learned baselines are in
 Appendix~\ref{app:paired}.
 
 %% Measured by code_DWTA/measure_method_timing.py (Greedy, Auction, Sequential,

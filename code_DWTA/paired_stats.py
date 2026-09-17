@@ -1,9 +1,12 @@
 """
-Paired significance tests, ours against every baseline (reviewer 3.8).
+Paired significance tests, ours against every learned baseline (reviewer 3.8).
 
-Reads result/paired_instances.csv, result/paired_instances_rl4co.csv and the
-SCIP per-instance files. Our per-instance value is the mean over the ten
-seeds at K=0, the same quantity as the main table. For each baseline:
+SCIP is an exact solver, not a learned baseline, and is excluded; the paper
+compares against it by tier instead (Appendix: SCIP optimality).
+
+Reads result/paired_instances.csv and result/paired_instances_rl4co.csv. Our
+per-instance value is the mean over the ten seeds at K=0, the same quantity
+as the main table. For each baseline:
 
   overall     Wilcoxon signed-rank over all 120 instances (two-sided)
   per config  Wilcoxon over the ten instances, Holm-corrected across the
@@ -26,8 +29,7 @@ from scipy.stats import wilcoxon
 from eval_final_table import CONFIGS
 
 CFGS = ["%dM_%dN_%dT" % c for c in CONFIGS]
-SCIP_CSV = "result/scip_moderate_%s_600s.csv"
-BASELINES = ["SCIP", "Greedy", "Auction", "AM", "POMO", "Sequential"]
+BASELINES = ["Greedy", "Auction", "AM", "POMO", "Sequential"]  # SCIP is an exact solver, not a learned baseline; excluded from this test
 TIE = 1e-6
 
 
@@ -36,11 +38,6 @@ def load():
     for path in ("result/paired_instances.csv", "result/paired_instances_rl4co.csv"):
         for r in csv.DictReader(open(path)):
             v[r["method"]][(r["config"], int(r["instance"]))] = float(r["objective"])
-    for cfg in CFGS:
-        for r in csv.DictReader(open(SCIP_CSV % cfg)):
-            i = int(r["instance"])
-            if i < 10:
-                v["SCIP"][(cfg, i)] = float(r["objective_norm"])
     keys = [(c, i) for c in CFGS for i in range(10)]
     for k in keys:
         v["Ours"][k] = float(np.mean([v["Ours_s%d_K0" % s][k] for s in range(1, 11)]))

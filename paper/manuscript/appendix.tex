@@ -197,20 +197,21 @@ baseline.
 \begin{table}[htbp]
 \centering
 \small
-\caption{Paired Wilcoxon signed-rank test, ours against each baseline, over
-all 120 seed-123 instances. W/L/T counts instances where ours is better,
-worse, or tied.}
+\caption{Paired Wilcoxon signed-rank test, ours against each learned baseline,
+over all 120 seed-123 instances. W/L/T counts instances where ours is better,
+worse, or tied. SCIP is an exact solver, not a learned baseline, and is
+excluded here; Appendix~\ref{app:scip} gives the tier-by-tier comparison
+against it.}
 \label{tab:paired-overall}
 \begin{tabular}{@{}lrrrr@{}}
 \toprule
-Baseline & Mean diff. & W/L/T & $p$ \
+Baseline & Mean diff. & W/L/T & $p$ \\
 \midrule
-SCIP        & $+0.141$ & 48/72/0  & 0.257 \
-Greedy      & $+0.365$ & 120/0/0  & $<10^{-4}$ \
-Auction     & $+0.144$ & 117/3/0  & $<10^{-4}$ \
-AM          & $+0.153$ & 117/3/0  & $<10^{-4}$ \
-POMO        & $+0.146$ & 108/12/0 & $<10^{-4}$ \
-Sequential  & $+0.019$ & 79/41/0  & 0.0004 \
+Greedy      & $+0.365$ & 120/0/0  & $<10^{-4}$ \\
+Auction     & $+0.144$ & 117/3/0  & $<10^{-4}$ \\
+AM          & $+0.153$ & 117/3/0  & $<10^{-4}$ \\
+POMO        & $+0.146$ & 108/12/0 & $<10^{-4}$ \\
+Sequential  & $+0.019$ & 79/41/0  & 0.0004 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -230,28 +231,24 @@ across the twelve rows.}
 \label{tab:paired-sequential}
 \begin{tabular}{@{}lrrrr@{}}
 \toprule
-Config & Mean diff. & W/L/T & $p$ (Holm) \
+Config & Mean diff. & W/L/T & $p$ (Holm) \\
 \midrule
-(5,5,5)      & $-0.022$ & 1/9/0  & 0.096 \
-(5,7,5)      & $+0.054$ & 8/2/0  & 0.322 \
-(10,15,5)    & $+0.075$ & 10/0/0 & 0.023* \
-(15,15,5)    & $+0.001$ & 6/4/0  & 0.695 \
-(15,20,5)    & $+0.041$ & 8/2/0  & 0.096 \
-(20,30,5)    & $+0.087$ & 10/0/0 & 0.023* \
-(30,30,10)   & $-0.001$ & 7/3/0  & 0.393 \
-(30,40,10)   & $-0.009$ & 2/8/0  & 0.078 \
-(40,50,10)   & $-0.009$ & 1/9/0  & 0.039* \
-(50,50,15)   & $+0.003$ & 9/1/0  & 0.336 \
-(50,70,15)   & $+0.002$ & 8/2/0  & 0.393 \
-(70,100,15)  & $+0.003$ & 9/1/0  & 0.039* \
+(5,5,5)      & $-0.022$ & 1/9/0  & 0.096 \\
+(5,7,5)      & $+0.054$ & 8/2/0  & 0.322 \\
+(10,15,5)    & $+0.075$ & 10/0/0 & 0.023* \\
+(15,15,5)    & $+0.001$ & 6/4/0  & 0.695 \\
+(15,20,5)    & $+0.041$ & 8/2/0  & 0.096 \\
+(20,30,5)    & $+0.087$ & 10/0/0 & 0.023* \\
+(30,30,10)   & $-0.001$ & 7/3/0  & 0.393 \\
+(30,40,10)   & $-0.009$ & 2/8/0  & 0.078 \\
+(40,50,10)   & $-0.009$ & 1/9/0  & 0.039* \\
+(50,50,15)   & $+0.003$ & 9/1/0  & 0.336 \\
+(50,70,15)   & $+0.002$ & 8/2/0  & 0.393 \\
+(70,100,15)  & $+0.003$ & 9/1/0  & 0.039* \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Against SCIP, the overall test is not significant ($p=0.257$), consistent
-with the tier split reported in the main text: SCIP wins at small scale and
-loses at large scale, so pooling both directions across all 120 instances
-washes out the effect rather than revealing a net advantage either way.
 Against every learned baseline other than Sequential, the advantage is
 significant overall and at every configuration except two single-configuration
 ties with POMO, (50,50,15) and (70,100,15), where POMO's own advantage there
